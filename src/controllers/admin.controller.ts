@@ -1,5 +1,10 @@
 import { Request, Response } from 'express';
 import { T } from '../libs/types/common';
+import { MemberInput, LoginInput } from '../libs/types/member';
+import { MemberType } from '../libs/enums/member.enum';
+import MemberService from '../models/Member.service';
+
+const memberService = new MemberService();
 
 const adminController: T = {};
 
@@ -33,22 +38,34 @@ adminController.getSignup = (req: Request, res: Response) => {
 };
 
 
-adminController.processLogin = (req: Request, res: Response) => {
+adminController.processLogin = async (req: Request, res: Response) => {
     try {
         console.log("processLogin");
-        res.send("DONE");
+        console.log("req.body: ", req.body);
+
+        const member: LoginInput = req.body;
+        const result = await memberService.processLogin(member);
+        
+        res.send(result);
     } catch (err) {
         console.log("Error, processLogin:", err);
     }
 };
 
 
-adminController.processSignup = (req: Request, res: Response) => {
+adminController.processSignup = async (req: Request, res: Response) => {
     try {
-        console.log("processLoprocessSignUpgin");
-        res.send("DONE");
+        console.log("processSignup");
+        console.log("req.body: ", req.body);
+
+        const newMember: MemberInput = req.body;
+        newMember.memberType = MemberType.ADMIN;
+        const result = await memberService.processSignup(newMember);
+
+        res.send(result);
     } catch (err) {
         console.log("Error, processSignUp:", err);
+        res.send(err);
     }
 };
 
