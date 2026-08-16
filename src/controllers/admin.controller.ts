@@ -18,9 +18,21 @@ adminController.goHome = (req: Request, res: Response) => {
 };
 
 
+adminController.getSignup = (req: Request, res: Response) => {
+    
+    try { 
+        res.send("Signup Page");
+    } catch (err) {
+        console.log("Error, getSignup:", err);
+    }
+};
+
+
 adminController.getLogin = (req: Request, res: Response) => {
     
     try { 
+        console.log("getLogin");
+
         res.send("Login Page");
     } catch (err) {
         console.log("Error, getLogin:", err);
@@ -28,12 +40,22 @@ adminController.getLogin = (req: Request, res: Response) => {
 };
 
 
-adminController.getSignup = (req: Request, res: Response) => {
-    
-    try { 
-        res.send("Signup Page");
+
+adminController.processSignup = async (req: Request, res: Response) => {
+    try {
+        console.log("processSignup");
+        console.log("req.body: ", req.body);
+        
+        const newMember: MemberInput = req.body;
+        newMember.memberType = MemberType.ADMIN;
+
+        const result = await memberService.processSignup(newMember);
+        // Session Auth
+        
+        res.send(result);
     } catch (err) {
-        console.log("Error, getSignup:", err);
+        console.log("Error, processSignUp:", err);
+        res.send(err);
     }
 };
 
@@ -45,29 +67,12 @@ adminController.processLogin = async (req: Request, res: Response) => {
 
         const member: LoginInput = req.body;
         const result = await memberService.processLogin(member);
+        // Session Auth
         
         res.send(result);
     } catch (err) {
         console.log("Error, processLogin:", err);
     }
 };
-
-
-adminController.processSignup = async (req: Request, res: Response) => {
-    try {
-        console.log("processSignup");
-        console.log("req.body: ", req.body);
-
-        const newMember: MemberInput = req.body;
-        newMember.memberType = MemberType.ADMIN;
-        const result = await memberService.processSignup(newMember);
-
-        res.send(result);
-    } catch (err) {
-        console.log("Error, processSignUp:", err);
-        res.send(err);
-    }
-};
-
 
 export default adminController;
