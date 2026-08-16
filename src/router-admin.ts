@@ -15,7 +15,8 @@ routerAdmin
     .post('/signup', adminController.processSignup);
 
 routerAdmin
-    .get('/check', adminController.checkAuthSession);
+    .get('/check', adminController.checkAuthSession)
+    .get('/logout', adminController.logout);
 
 /** VEHICLE **/
 

@@ -3,40 +3,43 @@ import { T } from '../libs/types/common';
 import { AdminRequest, MemberInput, LoginInput } from '../libs/types/member';
 import { MemberType } from '../libs/enums/member.enum';
 import MemberService from '../models/Member.service';
-import { Message } from '../libs/Errors';
+import Errors, { Message } from '../libs/Errors';
 
 const memberService = new MemberService();
 
 const adminController: T = {};
 
 adminController.goHome = (req: Request, res: Response) => {
-    
-    try { 
+
+    try {
         res.render("index")
     } catch (err) {
         console.log("Error, goHome:", err);
+        res.redirect("/admin");
     }
 };
 
 
 adminController.getSignup = (req: Request, res: Response) => {
-    
-    try { 
+
+    try {
         res.render("users");
     } catch (err) {
         console.log("Error, getSignup:", err);
+        res.redirect("/admin");
     }
 };
 
 
 adminController.getLogin = (req: Request, res: Response) => {
-    
-    try { 
+
+    try {
         console.log("getLogin");
 
-        res.render("vehicles");         
+        res.render("vehicles");
     } catch (err) {
         console.log("Error, getLogin:", err);
+        res.redirect("/admin");
     }
 };
 
@@ -46,7 +49,7 @@ adminController.processSignup = async (req: AdminRequest, res: Response) => {
     try {
         console.log("processSignup");
         console.log("req.body: ", req.body);
-        
+
         const newMember: MemberInput = req.body;
         newMember.memberType = MemberType.ADMIN;
 
@@ -54,12 +57,13 @@ adminController.processSignup = async (req: AdminRequest, res: Response) => {
 
         // Session Auth
         req.session.member = result;
-        req.session.save(function() {
+        req.session.save(function () {
             res.send(result);
         });
     } catch (err) {
         console.log("Error, processSignUp:", err);
-        res.send(err);
+        const message = err instanceof Errors ? err.message : Message.SOMETHING_WENT_WRONG;
+        res.send(`<script> alert("${message}"); window.location.replace('admin/login) </script>`)
     }
 };
 
@@ -71,14 +75,29 @@ adminController.processLogin = async (req: AdminRequest, res: Response) => {
 
         const member: LoginInput = req.body;
         const result = await memberService.processLogin(member);
-        
+
         // Session Auth
         req.session.member = result;
-        req.session.save(function() {
+        req.session.save(function () {
             res.send(result);
         });
     } catch (err) {
         console.log("Error, processLogin:", err);
+        const message = err instanceof Errors ? err.message : Message.SOMETHING_WENT_WRONG;
+        res.send(`<script> alert("${message}"); window.location.replace('admin/login) </script>`);
+    }
+};
+
+
+adminController.logout = async (req: AdminRequest, res: Response) => {
+    try {
+        console.log("logout");
+        req.session.destroy(function() {
+            res.redirect("/admin");
+        });
+    } catch (err) {
+        console.log("Error, logout:", err);
+        res.redirect("/admin");
     }
 };
 
@@ -94,6 +113,6 @@ adminController.checkAuthSession = async (req: AdminRequest, res: Response) => {
         console.log("Error, checkAuthSession:", err);
         res.send(err);
     }
-}
+};
 
 export default adminController;
