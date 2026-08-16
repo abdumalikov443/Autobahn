@@ -1,0 +1,167 @@
+<%- include('includes/header') %>
+
+  <body>
+
+    <!-- ===== Navbar ===== -->
+    <nav class="ab-navbar">
+      <div class="container d-flex align-items-center justify-content-between">
+        <a class="ab-brand" href="./index.html">
+          <span class="logo-box">A</span>
+          <span>
+            <span class="brand-name d-block">AUTOBAHN</span>
+            <span class="brand-sub">KOREA · ADMIN</span>
+          </span>
+        </a>
+        <div class="d-none d-md-flex align-items-center gap-2 text-white-50">
+          <i class="bi bi-shield-lock"></i>
+          <span style="font-size:13px;">Administrator Console</span>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ===== Auth hero with Login / Sign up ===== -->
+    <section class="auth-hero">
+      <div class="auth-stage">
+
+        <!-- Intro + hover buttons (shown first) -->
+        <div class="auth-intro">
+          <p class="eyebrow mb-1">Administrator Console</p>
+          <h1>German Engineering,<br>Managed With Precision</h1>
+          <p>Hover a button to begin — sign in or create your admin account.</p>
+        </div>
+
+        <div class="auth-launcher">
+          <button class="launch-btn gold" onmouseenter="showAuth('login')" onclick="openAuth('login')">Log in</button>
+          <button class="launch-btn ghost" onmouseenter="showAuth('signup')" onclick="openAuth('signup')">Sign
+            up</button>
+        </div>
+
+        <div class="auth-card" id="authCard">
+          <div class="text-center mb-3">
+            <p class="eyebrow mb-1">Admin Access</p>
+            <h1 class="mb-1" style="font-size:30px;">Welcome Back</h1>
+            <p class="text-muted-2 mb-0" style="font-size:14px;">Manage the Autobahn Korea fleet and members.</p>
+          </div>
+
+          <!-- Toggle -->
+          <div class="auth-tabs">
+            <button class="auth-tab active" id="tabLoginBtn" onclick="showAuth('login')">Log in</button>
+            <button class="auth-tab" id="tabSignupBtn" onclick="showAuth('signup')">Sign up</button>
+          </div>
+
+          <!-- LOGIN -->
+          <form id="loginForm" onsubmit="return goDashboard(event)">
+            <div class="mb-3">
+              <label class="form-label">Nickname</label>
+              <input type="text" class="form-control" placeholder="admin" required />
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Password</label>
+              <input type="password" class="form-control" placeholder="••••••••" required />
+            </div>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <label class="d-flex align-items-center gap-2 text-muted-2" style="font-size:13px;">
+                <input type="checkbox" class="form-check-input mt-0" /> Remember me
+              </label>
+              <a href="#" style="font-size:13px;">Forgot password?</a>
+            </div>
+            <button type="submit" class="btn btn-gold w-100">Log in to dashboard</button>
+          </form>
+
+          <!-- SIGN UP -->
+          <form id="signupForm" class="auth-hidden" onsubmit="return goDashboard(event)">
+
+            <!-- Profile image upload with live preview -->
+            <div class="upload-block mb-3">
+              <div class="upload-preview">
+                <i class="bi bi-person upload-placeholder"></i>
+                <img class="upload-img-frame" alt="Profile preview" />
+              </div>
+              <div class="upload-actions d-flex justify-content-center gap-2">
+                <label class="btn btn-outline-ink btn-sm mb-0">
+                  <i class="bi bi-upload me-1"></i><span class="upload-btn-text">Upload photo</span>
+                  <input type="file" class="upload-input d-none" accept="image/png, image/jpeg, image/jpg" />
+                </label>
+              </div>
+              <input type="text" class="upload-name" readonly />
+              <p class="text-muted-2 mt-2 mb-0" style="font-size:12px;">JPG, JPEG or PNG. Preview shows before you sign
+                up.</p>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Full name</label>
+              <input type="text" class="form-control" placeholder="Hong Gil-dong" required />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Email</label>
+              <input type="email" class="form-control" placeholder="you@autobahn.co.kr" required />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Password</label>
+              <input type="password" class="form-control" placeholder="Create a password" required />
+            </div>
+            <button type="submit" class="btn btn-ink w-100">Create admin account</button>
+          </form>
+
+          <p class="text-center text-muted-2 mt-3 mb-0" style="font-size:12px;">
+            Protected area · Autobahn Korea Co., Ltd.
+          </p>
+        </div>
+    </section>
+
+    <%- include('includes/footer') %>
+
+      <script>
+        function showAuth(which) {
+          const login = which === 'login';
+          document.getElementById('loginForm').classList.toggle('auth-hidden', !login);
+          document.getElementById('signupForm').classList.toggle('auth-hidden', login);
+          document.getElementById('tabLoginBtn').classList.toggle('active', login);
+          document.getElementById('tabSignupBtn').classList.toggle('active', !login);
+        }
+        function goDashboard(e) {
+          e.preventDefault();
+          // In your EJS app, POST to your auth route instead of this redirect.
+          window.location.href = '/admin/login';
+          return false;
+        }
+      </script>
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+      <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+      <script>
+        // Image upload with live preview (based on the FileReader pattern)
+        $(function () {
+          const fileTarget = $(".upload-input");
+
+          fileTarget.on("change", function () {
+            if (window.FileReader) {
+              const uploadFile = $(this)[0].files[0];
+              if (!uploadFile) return;
+
+              const fileType = uploadFile["type"];
+              const validImageType = ["image/jpg", "image/jpeg", "image/png"];
+
+              if (!validImageType.includes(fileType)) {
+                alert("Please insert only jpeg, jpg and png!");
+                return;
+              }
+
+              // Show the chosen image FIRST so the user can review it
+              $(".upload-img-frame")
+                .attr("src", URL.createObjectURL(uploadFile))
+                .addClass("success");
+              $(".upload-placeholder").hide();
+              $(".upload-preview").addClass("has-img");
+
+              // Let the user re-upload if they don't like it
+              $(".upload-btn-text").text("Change photo");
+
+              const filename = $(this)[0].files[0].name;
+              $(this).closest(".upload-block").find(".upload-name").val(filename);
+            }
+          });
+        });
+      </script>
+  </body>
+
+  </html>
