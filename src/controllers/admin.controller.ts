@@ -1,8 +1,9 @@
 import { Request, Response } from 'express';
 import { T } from '../libs/types/common';
-import { MemberInput, LoginInput } from '../libs/types/member';
+import { AdminRequest, MemberInput, LoginInput } from '../libs/types/member';
 import { MemberType } from '../libs/enums/member.enum';
 import MemberService from '../models/Member.service';
+import { Message } from '../libs/Errors';
 
 const memberService = new MemberService();
 
@@ -41,7 +42,7 @@ adminController.getLogin = (req: Request, res: Response) => {
 
 
 
-adminController.processSignup = async (req: Request, res: Response) => {
+adminController.processSignup = async (req: AdminRequest, res: Response) => {
     try {
         console.log("processSignup");
         console.log("req.body: ", req.body);
@@ -50,9 +51,12 @@ adminController.processSignup = async (req: Request, res: Response) => {
         newMember.memberType = MemberType.ADMIN;
 
         const result = await memberService.processSignup(newMember);
+
         // Session Auth
-        
-        res.send(result);
+        req.session.member = result;
+        req.session.save(function() {
+            res.send(result);
+        });
     } catch (err) {
         console.log("Error, processSignUp:", err);
         res.send(err);
@@ -60,19 +64,36 @@ adminController.processSignup = async (req: Request, res: Response) => {
 };
 
 
-adminController.processLogin = async (req: Request, res: Response) => {
+adminController.processLogin = async (req: AdminRequest, res: Response) => {
     try {
         console.log("processLogin");
         console.log("req.body: ", req.body);
 
         const member: LoginInput = req.body;
         const result = await memberService.processLogin(member);
-        // Session Auth
         
-        res.send(result);
+        // Session Auth
+        req.session.member = result;
+        req.session.save(function() {
+            res.send(result);
+        });
     } catch (err) {
         console.log("Error, processLogin:", err);
     }
 };
+
+
+adminController.checkAuthSession = async (req: AdminRequest, res: Response) => {
+    try {
+        console.log("checkAuthSession");
+        if (req.session?.member) {
+            console.log("memberNick: ", req.session.member.memberNick);
+            res.send(`<script> alert("${req.session.member.memberNick}") </script>`)
+        } else res.send(`<script> alert("${Message.NOT_AUTHENTICAED}") </script>`);
+    } catch (err) {
+        console.log("Error, checkAuthSession:", err);
+        res.send(err);
+    }
+}
 
 export default adminController;
