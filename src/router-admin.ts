@@ -1,5 +1,6 @@
 import express from 'express';
 import adminController from './controllers/admin.controller';
+import vehicleController from './controllers/vehicle.controller';
 
 const routerAdmin = express.Router();
 
@@ -19,6 +20,10 @@ routerAdmin
     .get('/logout', adminController.logout);
 
 /** VEHICLE **/
+routerAdmin
+    .get('/vehicle/all', adminController.verifyAdmin, vehicleController.getAllVehicles)
+    .post('/vehicle/create', adminController.verifyAdmin, vehicleController.createNewVehicle)
+    .post('/vehicle/update/:id', adminController.verifyAdmin, vehicleController.updateChosenVehicle);
 
 /** USER **/
 
