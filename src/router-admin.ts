@@ -53,5 +53,16 @@ routerAdmin
     )
 
 /** USER **/
+routerAdmin
+    .get(
+        "/user/all", 
+        adminController.verifyAdmin, 
+        adminController.getUsers
+    )
+    .post(
+        "/user/edit",
+        adminController.verifyAdmin,
+        adminController.updateChosenUser
+    );
 
 export default routerAdmin;
