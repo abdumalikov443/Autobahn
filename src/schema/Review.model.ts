@@ -9,13 +9,31 @@ const reviewSchema = new Schema({
 
     rating: {
         type: Number,
-        default: 0,
+        required: true,
+        min: 1,
+        max: 5,
+        validate: {
+            validator: Number.isInteger,
+            message: "rating must be a whole number",
+        },
     },
 
     reviewStatus: {
         type: String,
         enum: ReviewStatus,
-        default: ReviewStatus.PAUSE,
+        default: ReviewStatus.PENDING,
+    },
+
+    memberId: {
+        type: Schema.Types.ObjectId,
+        required: true,
+        ref: "Member"
+    },
+
+    vehicleId: {
+        type: Schema.Types.ObjectId,
+        required: true,
+        ref: "Vehicle"
     }
 }, { timestamps: true, collection: "reviews" }
 );
