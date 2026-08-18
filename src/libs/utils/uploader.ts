@@ -1,12 +1,15 @@
 import path from "path";
+import fs from "fs";
 import multer from "multer";
 import { randomUUID } from "crypto";
 
 /* MULTER IMAGE UPLOADER */
 function getTargetImageStore(address: any) {
+    const uploadPath = `./uploads/${address}`;
     return multer.diskStorage({
         destination: function (req, file, cb) {
-        cb(null, `./uploads/${address}`);
+            fs.mkdirSync(uploadPath, { recursive: true }); // creates the folder() only if missing;
+        cb(null, uploadPath);
     },
     filename: function (req, file, cb) {
         console.log(file);

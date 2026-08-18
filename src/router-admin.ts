@@ -34,13 +34,13 @@ routerAdmin
     )
     .post(
         '/vehicle/create', 
-        adminController.verifyAdmin, 
+        adminController.verifyAdmin,
+        makeUploader("vehicles").array("vehicleImages", 5),
         vehicleController.createNewVehicle
     )
     .post(
         '/vehicle/update/:id', 
         adminController.verifyAdmin,
-        makeUploader("vehicles").array("vehicleImages", 5),
         vehicleController.updateChosenVehicle
     );
 

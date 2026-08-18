@@ -58,7 +58,7 @@ const vehicleSchema = new Schema(
         },
 
         vehicleModel: {
-            type: Number,
+            type: String,
             required: true
         },
 
