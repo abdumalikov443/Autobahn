@@ -40,7 +40,7 @@ const VehicleSpecsSchema = new Schema<VehicleSpecs>({
 
 const vehicleSchema = new Schema(
     {
-        VehicleStatus: {
+        vehicleStatus: {
             type: String,
             enum: VehicleStatus,
             default: VehicleStatus.PAUSED
@@ -88,8 +88,7 @@ const vehicleSchema = new Schema(
         },
 
         vehicleDesc: {
-            type: String,
-            required: true
+            type: String
         },
 
         vehicleSpecs: {

@@ -3,7 +3,7 @@ import { T } from '../libs/types/common';
 import { AdminRequest, MemberInput, LoginInput } from '../libs/types/member';
 import { MemberType } from '../libs/enums/member.enum';
 import MemberService from '../models/Member.service';
-import Errors, { Message } from '../libs/Errors';
+import Errors, { HttpCode, Message } from '../libs/Errors';
 
 const memberService = new MemberService();
 
@@ -48,9 +48,11 @@ adminController.getLogin = (req: Request, res: Response) => {
 adminController.processSignup = async (req: AdminRequest, res: Response) => {
     try {
         console.log("processSignup");
-        console.log("req.body: ", req.body);
+        const file = req.file;
+        if (!file) throw new Errors(HttpCode.BAD_REQUEST, Message.SOMETHING_WENT_WRONG);
 
         const newMember: MemberInput = req.body;
+        newMember.memberImage = file?.path.replace(/\\/g, "/");
         newMember.memberType = MemberType.ADMIN;
 
         const result = await memberService.processSignup(newMember);
@@ -58,12 +60,12 @@ adminController.processSignup = async (req: AdminRequest, res: Response) => {
         // Session Auth
         req.session.member = result;
         req.session.save(function () {
-            res.send(result);
+            res.redirect("/admin/vehicle/all");
         });
     } catch (err) {
         console.log("Error, processSignUp:", err);
         const message = err instanceof Errors ? err.message : Message.SOMETHING_WENT_WRONG;
-        res.send(`<script> alert("${message}"); window.location.replace('admin/login) </script>`)
+        res.send(`<script> alert("${message}"); window.location.replace('admin/signup') </script>`)
     }
 };
 
@@ -79,12 +81,12 @@ adminController.processLogin = async (req: AdminRequest, res: Response) => {
         // Session Auth
         req.session.member = result;
         req.session.save(function () {
-            res.send(result);
+            res.redirect("/admin/vehicle/all")
         });
     } catch (err) {
         console.log("Error, processLogin:", err);
         const message = err instanceof Errors ? err.message : Message.SOMETHING_WENT_WRONG;
-        res.send(`<script> alert("${message}"); window.location.replace('admin/login) </script>`);
+        res.send(`<script> alert("${message}"); window.location.replace('admin/login') </script>`);
     }
 };
 
