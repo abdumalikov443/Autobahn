@@ -1,6 +1,7 @@
 import express from 'express';
 import adminController from './controllers/admin.controller';
 import vehicleController from './controllers/vehicle.controller';
+import makeUploader from './libs/utils/uploader';
 
 const routerAdmin = express.Router();
 
@@ -13,7 +14,11 @@ routerAdmin
 
 routerAdmin
     .get('/signup', adminController.getSignup)
-    .post('/signup', adminController.processSignup);
+    .post(
+        '/signup', 
+        makeUploader("members").single("memberImage"),
+        adminController.processSignup
+    );
 
 routerAdmin
     .get('/check', adminController.checkAuthSession)
@@ -21,9 +26,22 @@ routerAdmin
 
 /** VEHICLE **/
 routerAdmin
-    .get('/vehicle/all', adminController.verifyAdmin, vehicleController.getAllVehicles)
-    .post('/vehicle/create', adminController.verifyAdmin, vehicleController.createNewVehicle)
-    .post('/vehicle/update/:id', adminController.verifyAdmin, vehicleController.updateChosenVehicle);
+    .get(
+        '/vehicle/all', 
+        adminController.verifyAdmin, 
+        vehicleController.getAllVehicles
+    )
+    .post(
+        '/vehicle/create', 
+        adminController.verifyAdmin, 
+        vehicleController.createNewVehicle
+    )
+    .post(
+        '/vehicle/update/:id', 
+        adminController.verifyAdmin,
+        makeUploader("vehicles").array("vehicleImages", 5),
+        vehicleController.updateChosenVehicle
+    );
 
 /** USER **/
 
