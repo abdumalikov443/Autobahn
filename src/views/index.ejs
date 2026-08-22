@@ -69,7 +69,12 @@
           </form>
 
           <!-- SIGN UP -->
-          <form id="signupForm" action="/admin/signup" method="POST" class="<%= authView === 'signup' ? '' : 'auth-hidden' %>"> <!-- onsubmit="return goDashboard(event) -->
+          <form 
+            id="signupForm" 
+            action="/admin/signup" 
+            method="POST" 
+            class="<%= authView === 'signup' ? '' : 'auth-hidden' %>"
+            onsubmit="return validateSignupForm()">
 
             <!-- Profile image upload with live preview -->
             <div class="upload-block mb-3">
@@ -80,7 +85,7 @@
               <div class="upload-actions d-flex justify-content-center gap-2">
                 <label class="btn btn-outline-ink btn-sm mb-0">
                   <i class="bi bi-upload me-1"></i><span class="upload-btn-text">Upload photo</span>
-                  <input type="file" class="upload-input d-none" accept="image/png, image/jpeg, image/jpg" />
+                  <input type="file" name="memberImage" class="upload-input d-none member-image" accept="image/png, image/jpeg, image/jpg" />
                 </label>
               </div>
               <input type="text" class="upload-name" readonly />
@@ -90,15 +95,15 @@
 
             <div class="mb-3">
               <label class="form-label">Nick name</label>
-              <input type="text" class="form-control" placeholder="Jason" required />
+              <input type="text" name="memberNick" class="form-control member-nick" placeholder="Jason" value="" required />
             </div>
             <div class="mb-3">
               <label class="form-label">Phone</label>
-              <input type="text" class="form-control" placeholder="+82 10 1234 5678" required />
+              <input type="text" name="memberPhone" class="form-control member-phone" placeholder="+82 10 1234 5678" value="" required />
             </div>
             <div class="mb-3">
               <label class="form-label">Password</label>
-              <input type="password" class="form-control" placeholder="Create a password" required />
+              <input type="password" name="memberPassword" class="form-control member-password " placeholder="Create a password" value="" required />
             </div>
             <button type="submit" class="btn btn-ink w-100">Create an account</button>
           </form>
@@ -111,6 +116,7 @@
 
     <%- include('includes/footer') %>
 
+      <script type="text/javascript" src="../public/js/singup.js"></script>
       <script>
         function showAuth(which) {
           const login = which === 'login';
@@ -129,38 +135,7 @@
       <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
       <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
       <script>
-        // Image upload with live preview (based on the FileReader pattern)
-        $(function () {
-          const fileTarget = $(".upload-input");
-
-          fileTarget.on("change", function () {
-            if (window.FileReader) {
-              const uploadFile = $(this)[0].files[0];
-              if (!uploadFile) return;
-
-              const fileType = uploadFile["type"];
-              const validImageType = ["image/jpg", "image/jpeg", "image/png"];
-
-              if (!validImageType.includes(fileType)) {
-                alert("Please insert only jpeg, jpg and png!");
-                return;
-              }
-
-              // Show the chosen image FIRST so the user can review it
-              $(".upload-img-frame")
-                .attr("src", URL.createObjectURL(uploadFile))
-                .addClass("success");
-              $(".upload-placeholder").hide();
-              $(".upload-preview").addClass("has-img");
-
-              // Let the user re-upload if they don't like it
-              $(".upload-btn-text").text("Change photo");
-
-              const filename = $(this)[0].files[0].name;
-              $(this).closest(".upload-block").find(".upload-name").val(filename);
-            }
-          });
-        });
+        
       </script>
   </body>
 
