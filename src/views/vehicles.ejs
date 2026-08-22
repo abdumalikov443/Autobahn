@@ -15,7 +15,7 @@
         <div class="d-flex align-items-center gap-1">
           <a class="ab-nav-link active" href="/admin/login"><i class="bi bi-car-front me-1"></i>Vehicles</a>
           <a class="ab-nav-link" href="/admin/signup"><i class="bi bi-people me-1"></i>Users</a>
-          <a class="btn btn-ghost-light btn-sm ms-2" href="./index.html">
+          <a class="btn btn-ghost-light btn-sm ms-2" href="/admin">
             <i class="bi bi-box-arrow-right me-1"></i>Logout
           </a>
         </div>
@@ -48,7 +48,7 @@
         <div class="ms-auto d-flex align-items-center gap-2 flex-wrap">
           <!-- Status filter -->
           <select id="statusFilter" class="form-select" style="width:auto;">
-            <option value="all">All statuses</option>
+            <option value="all">All statuses </option>
             <option value="Active">Active</option>
             <option value="Paused">Paused</option>
             <option value="Deleted">Deleted</option>
@@ -76,120 +76,27 @@
             </thead>
             <tbody>
               <!-- Row -->
-              <tr class="veh-row" data-category="Coupe" data-status="Active" data-name="porsche 911 carrera">
-                <td>
-                  <div class="veh-cell">
-                    <span class="veh-thumb"></span>
-                    <span>
-                      <span class="veh-brand d-block">Porsche</span>
-                      <span class="veh-name">911 Carrera</span>
-                    </span>
-                  </div>
-                </td>
-                <td>Coupe</td>
-                <td class="price-cell">₩3,120,000</td>
-                <td><span class="ab-badge badge-active">Active</span></td>
-                <td class="text-end">
-                  <a class="act-btn act-activate" title="Set active" href="#"><i class="bi bi-check-circle"></i></a>
-                  <a class="act-btn act-pause" title="Pause listing" href="#"><i class="bi bi-pause-fill"></i></a>
-                  <a class="act-btn act-delete" title="Mark as deleted" href="#"><i class="bi bi-trash"></i></a>
-                </td>
-              </tr>
-              <tr class="veh-row" data-category="Coupe" data-status="Active" data-name="bmw m4 competition">
-                <td>
-                  <div class="veh-cell">
-                    <span class="veh-thumb"></span>
-                    <span>
-                      <span class="veh-brand d-block">BMW</span>
-                      <span class="veh-name">M4 Competition</span>
-                    </span>
-                  </div>
-                </td>
-                <td>Coupe</td>
-                <td class="price-cell">₩2,190,000</td>
-                <td><span class="ab-badge badge-active">Active</span></td>
-                <td class="text-end">
-                  <a class="act-btn act-activate" title="Set active" href="#"><i class="bi bi-check-circle"></i></a>
-                  <a class="act-btn act-pause" title="Pause listing" href="#"><i class="bi bi-pause-fill"></i></a>
-                  <a class="act-btn act-delete" title="Mark as deleted" href="#"><i class="bi bi-trash"></i></a>
-                </td>
-              </tr>
-              <tr class="veh-row" data-category="Sedan" data-status="Paused" data-name="mercedes-benz s-class">
-                <td>
-                  <div class="veh-cell">
-                    <span class="veh-thumb"></span>
-                    <span>
-                      <span class="veh-brand d-block">Mercedes-Benz</span>
-                      <span class="veh-name">S-Class</span>
-                    </span>
-                  </div>
-                </td>
-                <td>Sedan</td>
-                <td class="price-cell">₩2,650,000</td>
-                <td><span class="ab-badge badge-paused">Paused</span></td>
-                <td class="text-end">
-                  <a class="act-btn act-activate" title="Set active" href="#"><i class="bi bi-check-circle"></i></a>
-                  <a class="act-btn act-pause" title="Pause listing" href="#"><i class="bi bi-pause-fill"></i></a>
-                  <a class="act-btn act-delete" title="Mark as deleted" href="#"><i class="bi bi-trash"></i></a>
-                </td>
-              </tr>
-              <tr class="veh-row" data-category="Sedan" data-status="Active" data-name="audi rs7 sportback">
-                <td>
-                  <div class="veh-cell">
-                    <span class="veh-thumb"></span>
-                    <span>
-                      <span class="veh-brand d-block">Audi</span>
-                      <span class="veh-name">RS7 Sportback</span>
-                    </span>
-                  </div>
-                </td>
-                <td>Sedan</td>
-                <td class="price-cell">₩2,480,000</td>
-                <td><span class="ab-badge badge-active">Active</span></td>
-                <td class="text-end">
-                  <a class="act-btn act-activate" title="Set active" href="#"><i class="bi bi-check-circle"></i></a>
-                  <a class="act-btn act-pause" title="Pause listing" href="#"><i class="bi bi-pause-fill"></i></a>
-                  <a class="act-btn act-delete" title="Mark as deleted" href="#"><i class="bi bi-trash"></i></a>
-                </td>
-              </tr>
-              <tr class="veh-row" data-category="SUV" data-status="Active" data-name="mercedes-benz g 63 amg">
-                <td>
-                  <div class="veh-cell">
-                    <span class="veh-thumb"></span>
-                    <span>
-                      <span class="veh-brand d-block">Mercedes-Benz</span>
-                      <span class="veh-name">G 63 AMG</span>
-                    </span>
-                  </div>
-                </td>
-                <td>SUV</td>
-                <td class="price-cell">₩3,480,000</td>
-                <td><span class="ab-badge badge-active">Active</span></td>
-                <td class="text-end">
-                  <a class="act-btn act-activate" title="Set active" href="#"><i class="bi bi-check-circle"></i></a>
-                  <a class="act-btn act-pause" title="Pause listing" href="#"><i class="bi bi-pause-fill"></i></a>
-                  <a class="act-btn act-delete" title="Mark as deleted" href="#"><i class="bi bi-trash"></i></a>
-                </td>
-              </tr>
-              <tr class="veh-row" data-category="Hatchback" data-status="Paused" data-name="volkswagen golf gti">
-                <td>
-                  <div class="veh-cell">
-                    <span class="veh-thumb"></span>
-                    <span>
-                      <span class="veh-brand d-block">Volkswagen</span>
-                      <span class="veh-name">Golf GTI</span>
-                    </span>
-                  </div>
-                </td>
-                <td>Hatchback</td>
-                <td class="price-cell">₩890,000</td>
-                <td><span class="ab-badge badge-paused">Paused</span></td>
-                <td class="text-end">
-                  <a class="act-btn act-activate" title="Set active" href="#"><i class="bi bi-check-circle"></i></a>
-                  <a class="act-btn act-pause" title="Pause listing" href="#"><i class="bi bi-pause-fill"></i></a>
-                  <a class="act-btn act-delete" title="Mark as deleted" href="#"><i class="bi bi-trash"></i></a>
-                </td>
-              </tr>
+              <% vehicles.map((value)=> { %>
+                <tr class="veh-row" data-category="Coupe" data-status="Active" data-name="porsche 911 carrera">
+                  <td>
+                    <div class="veh-cell">
+                      <span class="veh-thumb"></span>
+                      <span>
+                        <span class="veh-brand d-block"><%= value.vehicleBrand %></span>
+                        <span class="veh-name"><%= value.vehicleModel %></span>
+                      </span>
+                    </div>
+                  </td>
+                  <td><%= value.vehicleType %></td>
+                  <td class="price-cell">₩<%= value.vehiclePrice %></td>
+                  <td><span class="ab-badge badge-active"><%= value.vehicleStatus %></span></td>
+                  <td class="text-end">
+                    <a class="act-btn act-activate" title="Set active" href="#"><i class="bi bi-check-circle"></i></a>
+                    <a class="act-btn act-pause" title="Pause listing" href="#"><i class="bi bi-pause-fill"></i></a>
+                    <a class="act-btn act-delete" title="Mark as deleted" href="#"><i class="bi bi-trash"></i></a>
+                  </td>
+                </tr>
+                <% } ) %>
             </tbody>
           </table>
         </div>

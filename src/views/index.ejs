@@ -5,7 +5,7 @@
     <!-- ===== Navbar ===== -->
     <nav class="ab-navbar">
       <div class="container d-flex align-items-center justify-content-between">
-        <a class="ab-brand" href="./index.html">
+        <a class="ab-brand" href="/admin">
           <span class="logo-box">A</span>
           <span>
             <span class="brand-name d-block">AUTOBAHN</span>
@@ -45,12 +45,12 @@
 
           <!-- Toggle -->
           <div class="auth-tabs">
-            <button class="auth-tab active" id="tabLoginBtn" onclick="showAuth('login')">Log in</button>
-            <button class="auth-tab" id="tabSignupBtn" onclick="showAuth('signup')">Sign up</button>
+            <button class="auth-tab <%= authView === 'login' ? 'active' : '' %>" id="tabLoginBtn" onclick="showAuth('login')">Log in</button>
+            <button class="auth-tab <%= authView === 'signup' ? 'active' : '' %>" id="tabSignupBtn" onclick="showAuth('signup')">Sign up</button>
           </div>
 
           <!-- LOGIN -->
-          <form id="loginForm" onsubmit="return goDashboard(event)">
+          <form id="loginForm" action="admin/login" method="POST" class="<%= authView === 'login' ? '' : 'auth-hidden' %>">
             <div class="mb-3">
               <label class="form-label">Nickname</label>
               <input type="text" class="form-control" placeholder="admin" required />
@@ -69,7 +69,7 @@
           </form>
 
           <!-- SIGN UP -->
-          <form id="signupForm" class="auth-hidden" onsubmit="return goDashboard(event)">
+          <form id="signupForm" action="/admin/signup" method="POST" class="<%= authView === 'signup' ? '' : 'auth-hidden' %>"> <!-- onsubmit="return goDashboard(event) -->
 
             <!-- Profile image upload with live preview -->
             <div class="upload-block mb-3">
@@ -89,18 +89,18 @@
             </div>
 
             <div class="mb-3">
-              <label class="form-label">Full name</label>
-              <input type="text" class="form-control" placeholder="Hong Gil-dong" required />
+              <label class="form-label">Nick name</label>
+              <input type="text" class="form-control" placeholder="Jason" required />
             </div>
             <div class="mb-3">
-              <label class="form-label">Email</label>
-              <input type="email" class="form-control" placeholder="you@autobahn.co.kr" required />
+              <label class="form-label">Phone</label>
+              <input type="text" class="form-control" placeholder="+82 10 1234 5678" required />
             </div>
             <div class="mb-3">
               <label class="form-label">Password</label>
               <input type="password" class="form-control" placeholder="Create a password" required />
             </div>
-            <button type="submit" class="btn btn-ink w-100">Create admin account</button>
+            <button type="submit" class="btn btn-ink w-100">Create an account</button>
           </form>
 
           <p class="text-center text-muted-2 mt-3 mb-0" style="font-size:12px;">

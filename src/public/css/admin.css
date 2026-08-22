@@ -28,6 +28,7 @@
 
 * { box-sizing: border-box; }
 
+html,
 body {
   margin: 0;
   background: var(--bg);
@@ -38,7 +39,10 @@ body {
   /* Sticky footer: body fills the viewport and the footer is pushed down */
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  /* min-height: 100vh; */
+  padding: 0;
+  height: 100%;
+  width: 100%;
 }
 
 h1, h2, h3, h4, h5, .display-font {
@@ -240,7 +244,7 @@ a:hover { color: var(--gold); }
 .auth-hero::before {
   content: "";
   position: absolute; inset: 0;
-  background: url("./img/hero-car.png") center/cover no-repeat;
+  background: url("../img/hero-car.jpg") center/cover no-repeat;
   animation: heroZoom 22s ease-in-out infinite alternate;
   z-index: 0;
 }

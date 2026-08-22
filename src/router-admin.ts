@@ -22,7 +22,7 @@ routerAdmin
     );
 
 routerAdmin
-    .get('/check', adminController.checkAuthSession)
+    .get('/check-me', adminController.checkAuthSession)
     .get('/logout', adminController.logout);
 
 /** VEHICLE **/

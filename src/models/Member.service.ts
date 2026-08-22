@@ -42,8 +42,8 @@ class MemberService {
 
         if (!isMatch) throw new Errors(HttpCode.UNAUTHORIZED, Message.WRONG_PASSWORD);
 
-        const result = await this.memberModel.findById(member._id).lean().exec();
-        console.log("result:===== ", result); //@ts-ignore
+        const result = await this.memberModel.findById(member._id).exec();
+        console.log("result: ", result); //@ts-ignore
         return result.toJSON() as unknown as Member;
     }
 

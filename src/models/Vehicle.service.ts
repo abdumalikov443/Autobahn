@@ -14,6 +14,14 @@ class VehicleService {
 
 
     /* BSSR */
+    public async getAllVehicles(): Promise<Vehicle[]> {
+        const result =  await this.vehicleModel.find().exec();
+        if (!result) throw new Errors(HttpCode.NOT_FOUND, Message.NO_DATA_FOUND);
+
+        return result as unknown as Vehicle[];
+    }
+
+
     public async createNewVehicle(input: VehicleInput): Promise<Vehicle> {
         try {
             return await this.vehicleModel.create(input) as unknown as Vehicle;

@@ -12,7 +12,7 @@ const adminController: T = {};
 adminController.goHome = (req: Request, res: Response) => {
 
     try {
-        res.render("index")
+        res.render("index", { authView: "login", error: null })
     } catch (err) {
         console.log("Error, goHome:", err);
         res.redirect("/admin");
@@ -23,7 +23,7 @@ adminController.goHome = (req: Request, res: Response) => {
 adminController.getSignup = (req: Request, res: Response) => {
 
     try {
-        res.render("users");
+        res.render("index", { authView: "signup", error: null });
     } catch (err) {
         console.log("Error, getSignup:", err);
         res.redirect("/admin");
@@ -36,7 +36,7 @@ adminController.getLogin = (req: Request, res: Response) => {
     try {
         console.log("getLogin");
 
-        res.render("vehicles");
+        res.render("index", { authView: "login", error: null });
     } catch (err) {
         console.log("Error, getLogin:", err);
         res.redirect("/admin");
@@ -65,7 +65,7 @@ adminController.processSignup = async (req: AdminRequest, res: Response) => {
     } catch (err) {
         console.log("Error, processSignUp:", err);
         const message = err instanceof Errors ? err.message : Message.SOMETHING_WENT_WRONG;
-        res.send(`<script> alert("${message}"); window.location.replace('admin/signup') </script>`)
+        res.send(`<script> alert("${message}"); window.location.replace('/admin/signup') </script>`)
     }
 };
 
@@ -86,7 +86,7 @@ adminController.processLogin = async (req: AdminRequest, res: Response) => {
     } catch (err) {
         console.log("Error, processLogin:", err);
         const message = err instanceof Errors ? err.message : Message.SOMETHING_WENT_WRONG;
-        res.send(`<script> alert("${message}"); window.location.replace('admin/login') </script>`);
+        res.send(`<script> alert("${message}"); window.location.replace('/admin/login') </script>`);
     }
 };
 

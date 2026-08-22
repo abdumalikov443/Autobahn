@@ -29,7 +29,6 @@ memberController.login = async (req: Request, res: Response) => {
         console.log("login");
 
         const input: LoginInput = req.body;
-        console.log("req body kirib keldi ")
         const result = await memberService.login(input);
         // Token Auth
 
