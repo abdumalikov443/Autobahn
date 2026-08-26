@@ -22,7 +22,8 @@ class ReviewService {
 
     public async createNewReview(member: Member, input: ReviewInput): Promise<Review> {
         try {
-            return await this.reviewModel.create(input) as unknown as Review;
+            const newReview = { ...input, memberId: member._id };
+            return await this.reviewModel.create(newReview) as unknown as Review;
         } catch (err) {
             console.log("Error, createNewReview: ", err);
             throw new Errors(HttpCode.BAD_REQUEST, Message.CREATE_FAILED);
