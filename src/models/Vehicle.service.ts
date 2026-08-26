@@ -1,7 +1,9 @@
-import { shapeIntoMongooseObjectId } from "../libs/config";
+import { ObjectId } from "mongoose"
+import VehicleModel from "../schema/Vehicle.model";
 import { ReviewStatus } from "../libs/enums/review.enum";
-import { VehicleSortBy, VehicleStatus } from "../libs/enums/vehicle.enum";
+import { shapeIntoMongooseObjectId } from "../libs/config";
 import Errors, { HttpCode, Message } from "../libs/Errors";
+import { VehicleSortBy, VehicleStatus } from "../libs/enums/vehicle.enum";
 import { T } from "../libs/types/common";
 import {
   Vehicle,
@@ -9,7 +11,6 @@ import {
   VehicleInquiry,
   VehicleUpdateInput,
 } from "../libs/types/vehicle";
-import VehicleModel from "../schema/Vehicle.model";
 
 class VehicleService {
   private readonly vehicleModel;
@@ -92,6 +93,22 @@ class VehicleService {
     if (!result) throw new Errors(HttpCode.NOT_FOUND, Message.NO_DATA_FOUND);
 
     return result;
+  }
+
+
+  public async getVehicle(memberId: ObjectId | null, id: string): Promise<Vehicle> {
+    const vehicleId = shapeIntoMongooseObjectId(id);
+
+    let result = await this.vehicleModel
+      .findOne({
+        _id: vehicleId,
+        vehicleStatus: VehicleStatus.ACTIVE
+      })
+      .exec();
+    if (!result) throw new Errors(HttpCode.NOT_FOUND, Message.NO_DATA_FOUND);
+    // Check view existance
+
+    return result as unknown as Vehicle;
   }
 
   /* BSSR */

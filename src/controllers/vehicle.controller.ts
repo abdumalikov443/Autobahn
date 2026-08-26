@@ -2,7 +2,7 @@ import Errors, { HttpCode, Message } from "../libs/Errors";
 import { T } from "../libs/types/common";
 import { Request, Response } from "express";
 import VehicleService from "../models/Vehicle.service";
-import { AdminRequest } from "../libs/types/member";
+import { AdminRequest, MemberRequest } from "../libs/types/member";
 import { VehicleInput, VehicleInquiry } from "../libs/types/vehicle";
 import { VehicleSortBy, VehicleType } from "../libs/enums/vehicle.enum";
 
@@ -51,6 +51,24 @@ vehicleController.getVehicles = async (req: Request, res: Response) => {
         console.log("Error, getVehicles:", err);
         if (err instanceof Errors) res.status(err.code).json(err);
         else res.status(Errors.standard.code).json(Errors.standard);
+    }
+}
+
+vehicleController.getVehicle = async (req: MemberRequest, res: Response) => {
+    try {
+        console.log("getVehicle");
+
+        const { id } = req.params;
+        console.log("req.member-->", req.member);
+
+        const memberId = req.member?._id ?? null; // @ts-ignore
+        const result = await vehicleService.getVehicle(memberId, id);
+
+        res.status(HttpCode.OK).json({data: result});
+    } catch(err) {
+       console.log("Error, getVehicle:", err);
+        if (err instanceof Errors) res.status(err.code).json(err);
+        else res.status(Errors.standard.code).json(Errors.standard); 
     }
 }
 
