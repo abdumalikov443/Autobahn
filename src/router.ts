@@ -24,5 +24,9 @@ router
 router
     .post('/review/create', memberController.verifyAuth, reviewController.createNewReview);
 
+/** ORDERS **/
+router
+    .post('/order/create', memberController.verifyAuth, )
+
 
 export default router;
