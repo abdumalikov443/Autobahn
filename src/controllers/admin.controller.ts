@@ -138,7 +138,7 @@ adminController.checkAuthSession = async (req: AdminRequest, res: Response) => {
         if (req.session?.member) {
             console.log("memberNick: ", req.session.member.memberNick);
             res.send(`<script> alert("${req.session.member.memberNick}") </script>`)
-        } else res.send(`<script> alert("${Message.NOT_AUTHENTICAED}") </script>`);
+        } else res.send(`<script> alert("${Message.NOT_AUTHENTICATED}") </script>`);
     } catch (err) {
         console.log("Error, checkAuthSession:", err);
         res.send(err);
@@ -151,7 +151,7 @@ adminController.verifyAdmin = async (req: AdminRequest, res: Response, next: Nex
         req.member = req.session.member;
         next(); // if we don't use next() here the server will be down
     } else {
-        const message = Message.NOT_AUTHENTICAED;
+        const message = Message.NOT_AUTHENTICATED;
         res.send(`<script> alert("${message}"); window.location.replace('/admin/login'); </script>`);
     }
 };
