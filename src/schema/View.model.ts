@@ -18,6 +18,7 @@ const viewSchema = new Schema(
     vehicleId: {
       type: Schema.Types.ObjectId,
       required: true,
+      ref: "Vehicle"
     },
 
 
