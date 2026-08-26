@@ -1,4 +1,4 @@
-import { ObjectId } from "mongoose"
+import { ObjectId } from "mongoose";
 import VehicleModel from "../schema/Vehicle.model";
 import { ReviewStatus } from "../libs/enums/review.enum";
 import { shapeIntoMongooseObjectId } from "../libs/config";
@@ -11,12 +11,17 @@ import {
   VehicleInquiry,
   VehicleUpdateInput,
 } from "../libs/types/vehicle";
+import ViewService from "./View.service";
+import { ViewInput } from "../libs/types/view";
+import { ViewGroup } from "../libs/enums/view.enum";
 
 class VehicleService {
   private readonly vehicleModel;
+  public viewService;
 
   constructor() {
     this.vehicleModel = VehicleModel;
+    this.viewService = new ViewService();
   }
 
   /* SPA */
@@ -95,18 +100,40 @@ class VehicleService {
     return result;
   }
 
-
-  public async getVehicle(memberId: ObjectId | null, id: string): Promise<Vehicle> {
+  public async getVehicle(
+    memberId: ObjectId | null,
+    id: string,
+  ): Promise<Vehicle> {
     const vehicleId = shapeIntoMongooseObjectId(id);
 
     let result = await this.vehicleModel
       .findOne({
         _id: vehicleId,
-        vehicleStatus: VehicleStatus.ACTIVE
+        vehicleStatus: VehicleStatus.ACTIVE,
       })
       .exec();
     if (!result) throw new Errors(HttpCode.NOT_FOUND, Message.NO_DATA_FOUND);
-    // Check view existance
+    // Check view existence
+    if (memberId) {
+      const input: ViewInput = {
+        viewGroup: ViewGroup.VEHICLE,
+        memberId: memberId,
+        vehicleId: vehicleId,
+      };
+      const existView = await this.viewService.checkViewExistence(input);
+      console.log("exist: ", !!existView);
+      if (!existView) {
+        await this.viewService.insertMemberView(input);
+        // Increase vehicleView counts
+        result = await this.vehicleModel
+          .findByIdAndUpdate(
+            vehicleId,
+            { $inc: { vehicleViews: +1 } },
+            { new: true },
+          )
+          .exec();
+      }
+    }
 
     return result as unknown as Vehicle;
   }

@@ -59,7 +59,6 @@ vehicleController.getVehicle = async (req: MemberRequest, res: Response) => {
         console.log("getVehicle");
 
         const { id } = req.params;
-        console.log("req.member-->", req.member);
 
         const memberId = req.member?._id ?? null; // @ts-ignore
         const result = await vehicleService.getVehicle(memberId, id);

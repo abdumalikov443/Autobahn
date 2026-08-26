@@ -18,7 +18,7 @@ router
 router
     .get('/vehicle/top-vehicles', vehicleController.getTopVehicles)
     .get('/vehicle/all', vehicleController.getVehicles)
-    .get('/vehicle/:id', vehicleController.getVehicle)
+    .get('/vehicle/:id', memberController.retrieveAuth, vehicleController.getVehicle)
 
 /** REVIEWS **/
 router
