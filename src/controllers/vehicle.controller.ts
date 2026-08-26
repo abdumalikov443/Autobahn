@@ -48,13 +48,13 @@ vehicleController.createNewVehicle = async (req: AdminRequest, res: Response) =>
 
         await vehicleService.createNewVehicle(data);
         res.send(
-            `<script> alert("Successful creation"); window.location.replace('admin/vehicle/all') </script>`
+            `<script> alert("Successful creation"); window.location.replace('/admin/vehicle/all') </script>`
         );
     } catch (err) {
         console.log("Error, createNewVehicle:", err);
         const message = err instanceof Errors ? err.message : Message.SOMETHING_WENT_WRONG;
         res.send(
-            `<script> alert("${message}"); window.location.replace('admin/vehicle/all') </script>`
+            `<script> alert("${message}"); window.location.replace('/admin/vehicle/all') </script>`
         );
     }
 };

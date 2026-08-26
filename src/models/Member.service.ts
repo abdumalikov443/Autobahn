@@ -71,9 +71,10 @@ class MemberService {
     public async processLogin(input: LoginInput): Promise<Member> {
         const member = await this.memberModel
             .findOne(
-                { memberNick: input.memberNick },
+                { memberNick: input.memberNick, memberType: MemberType.ADMIN },
                 { memberNick: 1, memberPassword: 1 }
             ).exec();
+            console.log(member);
 
         if (!member) throw new Errors(HttpCode.NOT_FOUND, Message.NO_MEMBER_NICK);
 

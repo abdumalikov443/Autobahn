@@ -25,11 +25,12 @@ routerAdmin
     .get('/check-me', adminController.checkAuthSession)
     .get('/logout', adminController.logout);
 
+
 /** VEHICLE **/
 routerAdmin
     .get(
         '/vehicle/all', 
-        adminController.verifyAdmin, 
+        // adminController.verifyAdmin, 
         vehicleController.getAllVehicles
     )
     .post(
@@ -44,6 +45,7 @@ routerAdmin
         vehicleController.updateChosenVehicle
     );
 
+
 /** REVIEW **/
 routerAdmin
     .get(
@@ -52,11 +54,12 @@ routerAdmin
         reviewController.getAllReviews
     )
 
+
 /** USER **/
 routerAdmin
     .get(
         "/user/all", 
-        adminController.verifyAdmin, 
+        // adminController.verifyAdmin, 
         adminController.getUsers
     )
     .post(

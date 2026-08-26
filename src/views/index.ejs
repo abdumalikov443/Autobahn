@@ -1,24 +1,5 @@
 <%- include('includes/header') %>
 
-  <body>
-
-    <!-- ===== Navbar ===== -->
-    <nav class="ab-navbar">
-      <div class="container d-flex align-items-center justify-content-between">
-        <a class="ab-brand" href="/admin">
-          <span class="logo-box">A</span>
-          <span>
-            <span class="brand-name d-block">AUTOBAHN</span>
-            <span class="brand-sub">KOREA · ADMIN</span>
-          </span>
-        </a>
-        <div class="d-none d-md-flex align-items-center gap-2 text-white-50">
-          <i class="bi bi-shield-lock"></i>
-          <span style="font-size:13px;">Administrator Console</span>
-        </div>
-      </div>
-    </nav>
-
     <!-- ===== Auth hero with Login / Sign up ===== -->
     <section class="auth-hero">
       <div class="auth-stage">
@@ -50,7 +31,7 @@
           </div>
 
           <!-- LOGIN -->
-          <form id="loginForm" action="admin/login" method="POST" class="<%= authView === 'login' ? '' : 'auth-hidden' %>">
+          <form id="loginForm" action="/admin/login" method="POST" class="<%= authView === 'login' ? '' : 'auth-hidden' %>">
             <div class="mb-3">
               <label class="form-label">Nickname</label>
               <input type="text" class="form-control" placeholder="admin" required />
@@ -74,6 +55,7 @@
             action="/admin/signup" 
             method="POST" 
             class="<%= authView === 'signup' ? '' : 'auth-hidden' %>"
+            enctype="multipart/form-data"
             onsubmit="return validateSignupForm()">
 
             <!-- Profile image upload with live preview -->
@@ -85,7 +67,7 @@
               <div class="upload-actions d-flex justify-content-center gap-2">
                 <label class="btn btn-outline-ink btn-sm mb-0">
                   <i class="bi bi-upload me-1"></i><span class="upload-btn-text">Upload photo</span>
-                  <input type="file" name="memberImage" class="upload-input d-none member-image" accept="image/png, image/jpeg, image/jpg" />
+                  <input type="file" name="memberImage" class="upload-input d-none member-image" accept="image/png, image/jpeg, image/jpg"  required/>
                 </label>
               </div>
               <input type="text" class="upload-name" readonly />
@@ -116,7 +98,7 @@
 
     <%- include('includes/footer') %>
 
-      <script type="text/javascript" src="../public/js/singup.js"></script>
+      <script type="text/javascript" src="../public/js/signup.js"></script>
       <script>
         function showAuth(which) {
           const login = which === 'login';
@@ -134,9 +116,3 @@
       </script>
       <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
       <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-      <script>
-        
-      </script>
-  </body>
-
-  </html>

@@ -18,7 +18,8 @@ reviewController.getAllReviews = async (req: Request, res: Response) => {
     try {
         console.log("--getAllReviews--");
         const result = await reviewService.getAllReviews();
-        res.status(HttpCode.OK).json({ data: result });
+        res.render("reviews", {vehicles: result});
+        // res.status(HttpCode.OK).json({ data: result });
     } catch (err) {
         console.log("Error, getAllReviews:", err);
         if (err instanceof Errors) res.status(err.code).json(err);

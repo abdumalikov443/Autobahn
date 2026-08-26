@@ -81,7 +81,8 @@ adminController.processLogin = async (req: AdminRequest, res: Response) => {
         // Session Auth
         req.session.member = result;
         req.session.save(function () {
-            res.redirect("/admin/vehicle/all")
+            // res.redirect("/admin/vehicle/all")
+            res.send(result);
         });
     } catch (err) {
         console.log("Error, processLogin:", err);
