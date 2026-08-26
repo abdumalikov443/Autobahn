@@ -1,5 +1,5 @@
 import { ObjectId } from "mongoose";
-import { VehicleStatus, VehicleType } from "../enums/vehicle.enum";
+import { VehicleSortBy, VehicleStatus, VehicleType } from "../enums/vehicle.enum";
 
 
 export interface Vehicle {
@@ -16,6 +16,14 @@ export interface Vehicle {
   vehicleDesc?: string;
   vehicleSpecs: VehicleSpecs;
   vehicleImages: string[];
+}
+
+export interface VehicleInquiry {
+  order: VehicleSortBy;
+  page: number;
+  limit: number;
+  search?: string
+  vehicleType?: VehicleType;
 }
 
 

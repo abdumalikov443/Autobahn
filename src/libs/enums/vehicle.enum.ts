@@ -24,3 +24,11 @@ export enum VehicleDriveTrain {
     FWD = 'FWD',
     RWD = 'RWD'
 }
+
+export enum VehicleSortBy {
+  POPULAR = "popular",
+  PRICE_LOW = "priceLow",
+  PRICE_HIGH = "priceHigh",
+  POWERFUL = "powerful",
+  NEWEST = "newest",
+}

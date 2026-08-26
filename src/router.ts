@@ -16,7 +16,8 @@ router
 
 /** VEHICLES **/
 router
-    .get('/vehicle/top-vehicles', vehicleController.getTopVehicles);
+    .get('/vehicle/top-vehicles', vehicleController.getTopVehicles)
+    .get('/vehicle/all', vehicleController.getVehicles)
 
 /** REVIEWS **/
 router

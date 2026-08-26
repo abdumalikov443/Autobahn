@@ -3,7 +3,8 @@ import { T } from "../libs/types/common";
 import { Request, Response } from "express";
 import VehicleService from "../models/Vehicle.service";
 import { AdminRequest } from "../libs/types/member";
-import { VehicleInput } from "../libs/types/vehicle";
+import { VehicleInput, VehicleInquiry } from "../libs/types/vehicle";
+import { VehicleSortBy, VehicleType } from "../libs/enums/vehicle.enum";
 
 const vehicleService = new VehicleService();
 
@@ -20,6 +21,34 @@ vehicleController.getTopVehicles = async (req: Request, res: Response) => {
         res.status(HttpCode.OK).json(result)
     } catch (err) {
         console.log("Error, getTopVehicles:", err);
+        if (err instanceof Errors) res.status(err.code).json(err);
+        else res.status(Errors.standard.code).json(Errors.standard);
+    }
+}
+
+vehicleController.getVehicles = async (req: Request, res: Response) => {
+    try {
+        console.log("getVehicles");
+        const {page, limit, order, search, vehicleType} = req.query;
+
+        const isValidSort = (value: string): value is VehicleSortBy =>
+        Object.values(VehicleSortBy).includes(value as VehicleSortBy);
+
+        const inquiry: VehicleInquiry = {
+            order:  isValidSort(order as string) ? (order as VehicleSortBy) : VehicleSortBy.POPULAR,
+            page: Number(page),
+            limit: Number(limit),
+        };
+        if (vehicleType) {
+            inquiry.vehicleType = vehicleType as VehicleType;
+        }
+        if (search) inquiry.search = String(search);
+
+        const result = await vehicleService.getVehicles(inquiry);
+
+        res.status(HttpCode.OK).json({data: result});
+    } catch (err) {
+        console.log("Error, getVehicles:", err);
         if (err instanceof Errors) res.status(err.code).json(err);
         else res.status(Errors.standard.code).json(Errors.standard);
     }

@@ -1,11 +1,12 @@
 import { shapeIntoMongooseObjectId } from "../libs/config";
 import { ReviewStatus } from "../libs/enums/review.enum";
-import { VehicleStatus } from "../libs/enums/vehicle.enum";
+import { VehicleSortBy, VehicleStatus } from "../libs/enums/vehicle.enum";
 import Errors, { HttpCode, Message } from "../libs/Errors";
 import { T } from "../libs/types/common";
 import {
   Vehicle,
   VehicleInput,
+  VehicleInquiry,
   VehicleUpdateInput,
 } from "../libs/types/vehicle";
 import VehicleModel from "../schema/Vehicle.model";
@@ -56,6 +57,41 @@ class VehicleService {
     console.log("5 ta top car lar: ===== ", result);
 
     return result as unknown as Vehicle[];
+  }
+
+  public async getVehicles(inquiry: VehicleInquiry): Promise<Vehicle[]> {
+    console.log(inquiry);
+    const match: T = { vehicleStatus: VehicleStatus.ACTIVE };
+
+    if (inquiry.vehicleType) match.vehicleType = inquiry.vehicleType;
+
+    if (inquiry.search) {
+      match.productName = { $regex: new RegExp(inquiry.search, "i") };
+    }
+
+    const sortMap: Record<VehicleSortBy, Record<string, 1 | -1>> = {
+      [VehicleSortBy.PRICE_LOW]: { vehiclePrice: 1 },
+      [VehicleSortBy.PRICE_HIGH]: { vehiclePrice: -1 },
+      [VehicleSortBy.NEWEST]: { createdAt: -1 },
+      [VehicleSortBy.POWERFUL]: {
+        "vehicleSpecs.power": -1,
+        "vehicleSpecs.acceleration": 1,
+      },
+      [VehicleSortBy.POPULAR]: { vehicleViews: -1 },
+    };
+    const sort = sortMap[inquiry.order] ?? sortMap[VehicleSortBy.POPULAR];
+
+    const result = await this.vehicleModel
+      .aggregate([
+        { $match: match },
+        { $sort: sort },
+        { $skip: (inquiry.page * 1 - 1) * inquiry.limit },
+        { $limit: inquiry.limit * 1 },
+      ])
+      .exec();
+    if (!result) throw new Errors(HttpCode.NOT_FOUND, Message.NO_DATA_FOUND);
+
+    return result;
   }
 
   /* BSSR */
