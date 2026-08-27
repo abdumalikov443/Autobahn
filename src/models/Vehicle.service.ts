@@ -85,6 +85,8 @@ class VehicleService {
         "vehicleSpecs.acceleration": 1,
       },
       [VehicleSortBy.POPULAR]: { vehicleViews: -1 },
+      // Ranks by how often a car has actually been leased; views break ties.
+      [VehicleSortBy.MOST_RENTED]: { vehicleRentedCount: -1, vehicleViews: -1 },
     };
     const sort = sortMap[inquiry.order] ?? sortMap[VehicleSortBy.POPULAR];
 
@@ -94,7 +96,34 @@ class VehicleService {
         { $sort: sort },
         {
           $facet: {
-            data: [{ $skip: (inquiry.page * 1 - 1) * inquiry.limit }, { $limit: inquiry.limit * 1 },],
+            data: [
+              { $skip: (inquiry.page * 1 - 1) * inquiry.limit },
+              { $limit: inquiry.limit * 1 },
+              // Ratings are joined per page, so every card can show them — they
+              // used to come only from top-vehicles, which needs a lease first.
+              {
+                $lookup: {
+                  from: "reviews",
+                  let: { vehicleId: "$_id" },
+                  pipeline: [
+                    {
+                      $match: {
+                        $expr: { $eq: ["$vehicleId", "$$vehicleId"] },
+                        reviewStatus: ReviewStatus.APPROVED,
+                      },
+                    },
+                  ],
+                  as: "reviewData",
+                },
+              },
+              {
+                $addFields: {
+                  averageRating: { $ifNull: [{ $avg: "$reviewData.rating" }, 0] },
+                  reviewCount: { $size: "$reviewData" },
+                },
+              },
+              { $project: { reviewData: 0 } },
+            ],
             metaCounter: [{ $count: 'total'}],
           },
         },

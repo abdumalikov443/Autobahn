@@ -28,6 +28,7 @@ export enum VehicleDriveTrain {
 
 export enum VehicleSortBy {
   POPULAR = "popular",
+  MOST_RENTED = "mostRented",
   PRICE_LOW = "priceLow",
   PRICE_HIGH = "priceHigh",
   POWERFUL = "powerful",
