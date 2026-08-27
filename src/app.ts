@@ -1,3 +1,4 @@
+import cors from "cors";
 import path from "path";
 import morgan from "morgan";
 import express from "express";
@@ -23,6 +24,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use('/uploads', express.static('./uploads'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(cors({ credentials: true, origin: true }));
 app.use(cookieParser());
 app.use(morgan(MORGAN_FORMAT)); // Support with logging
 
