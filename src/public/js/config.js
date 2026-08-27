@@ -226,7 +226,7 @@
   /* ---------- pagination ---------- */
 
   /** Default page size shared by all four admin tables. */
-  const PAGE_LIMIT = 10;
+  const PAGE_LIMIT = 6;
 
   /**
    * Paints the shared pager below a table. `shown` is how many rows this page
