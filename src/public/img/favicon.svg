@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <title>Autobahn Korea</title>
+  <!-- The brand mark from the site header: rounded gold tile with the "A". -->
+  <rect width="32" height="32" rx="5" fill="#c8934a"/>
+  <path
+    fill="#171613"
+    fill-rule="evenodd"
+    d="M16 5.5 L26 26.5 H21.2 L19.55 22.9 H12.45 L10.8 26.5 H6 Z
+       M16 12.6 L18.25 18.9 H13.75 Z"/>
+</svg>
