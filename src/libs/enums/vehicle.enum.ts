@@ -1,7 +1,8 @@
 export enum VehicleStatus {
     ACTIVE = 'ACTIVE',
     PAUSED = 'PAUSE',
-    DELETED = 'DELETED'
+    DELETED = 'DELETED',
+    OUT_OF_STOCK = 'OUT_OF_STOCK'
 }
 
 export enum VehicleType {

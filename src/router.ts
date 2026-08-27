@@ -3,6 +3,7 @@ import uploader from "./libs/utils/uploader";
 import memberController from './controllers/member.controller';
 import vehicleController from './controllers/vehicle.controller';
 import reviewController from './controllers/review.controller';
+import orderController from './controllers/order.controller';
 const router = express.Router();
 
 /** MEMBER **/
@@ -20,13 +21,15 @@ router
     .get('/vehicle/all', vehicleController.getVehicles)
     .get('/vehicle/:id', memberController.retrieveAuth, vehicleController.getVehicle)
 
+
 /** REVIEWS **/
 router
     .post('/review/create', memberController.verifyAuth, reviewController.createNewReview);
 
+
 /** ORDERS **/
 router
-    .post('/order/create', memberController.verifyAuth, )
+    .post('/order/create', memberController.verifyAuth, orderController.createOrder);
 
 
 export default router;

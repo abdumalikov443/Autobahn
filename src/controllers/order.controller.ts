@@ -19,3 +19,5 @@ orderController.createOrder = async (req: MemberRequest, res: Response) => {
     else res.status(Errors.standard.code).json(Errors.standard);
   }
 };
+
+export default orderController;

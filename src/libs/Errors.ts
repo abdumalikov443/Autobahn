@@ -20,7 +20,11 @@ export enum Message {
     USED_NICK_PHONE = "You are inserting already used nick and phone!",
     BLOCKED_USER = "You have been blocked, contact with admin!",
     WRONG_PASSWORD = "Wrong password, try again please!",
-    NOT_AUTHENTICATED = "You are not authenticated, please login first!"
+    NOT_AUTHENTICATED = "You are not authenticated, please login first!",
+
+    INVALID_DATE = "Please insert a valid date!",
+    DATE_IN_PAST = "You are inserting a past date, please choose upcoming dates!",
+    OUT_OF_STOCK = "This vehicle is Out Of Stock"
 }
 
 class Errors extends Error {

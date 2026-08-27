@@ -19,6 +19,5 @@ export interface OrderInput {
     orderLeaseTerm: LeaseTerm;
     orderDeliveryLocation: OrderDeliveryLocation;
     orderStartDate: Date;
-    memberId: ObjectId;
     vehicleId: ObjectId;
 }
