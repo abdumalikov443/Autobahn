@@ -70,9 +70,8 @@ class VehicleService {
     const match: T = { vehicleStatus: VehicleStatus.ACTIVE };
 
     if (inquiry.vehicleType) match.vehicleType = inquiry.vehicleType;
-
     if (inquiry.search) {
-      match.productName = { $regex: new RegExp(inquiry.search, "i") };
+      match.vehicleModel = { $regex: new RegExp(inquiry.search, "i") };
     }
 
     const sortMap: Record<VehicleSortBy, Record<string, 1 | -1>> = {
@@ -87,17 +86,22 @@ class VehicleService {
     };
     const sort = sortMap[inquiry.order] ?? sortMap[VehicleSortBy.POPULAR];
 
-    const result = await this.vehicleModel
+    const [result] = await this.vehicleModel
       .aggregate([
         { $match: match },
         { $sort: sort },
-        { $skip: (inquiry.page * 1 - 1) * inquiry.limit },
-        { $limit: inquiry.limit * 1 },
-      ])
-      .exec();
-    if (!result) throw new Errors(HttpCode.NOT_FOUND, Message.NO_DATA_FOUND);
+        {
+          $facet: {
+            data: [{ $skip: (inquiry.page * 1 - 1) * inquiry.limit }, { $limit: inquiry.limit * 1 },],
+            metaCounter: [{ $count: 'total '}],
+          },
+        },
+      ]).exec();
 
-    return result;
+    return {
+      data: result?.data ?? [],
+      total: result?.metaCounter[0]?.total ?? 0
+    } as unknown as Vehicle[];
   }
 
   public async getVehicle(

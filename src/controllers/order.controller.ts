@@ -1,13 +1,15 @@
 import { T } from "../libs/types/common";
-import { MemberRequest } from "../libs/types/member";
+import { AdminRequest, MemberRequest } from "../libs/types/member";
 import { Response } from "express";
 import Errors, { HttpCode } from "../libs/Errors";
 import OrderService from "../models/Order.service";
-import { OrderInquiry } from "../libs/types/order";
-import { OrderTab } from "../libs/enums/order.enum";
+import { AdminOrderInquiry, OrderInquiry } from "../libs/types/order";
+import { OrderStatus, OrderTab } from "../libs/enums/order.enum";
 
 const orderService = new OrderService();
 const orderController: T = {};
+
+
 
 orderController.createOrder = async (req: MemberRequest, res: Response) => {
   try {
@@ -52,5 +54,25 @@ orderController.getMyOrdersOverview = async (req: MemberRequest, res: Response) 
     else res.status(Errors.standard.code).json(Errors.standard);
   }
 };
+
+/** BSSR **/
+orderController.getAllOrdersByAdmin = async (req: AdminRequest, res: Response) => {
+  try {
+    console.log("getAllOrdersByAdmin");
+    const { page, limit, orderStatus, search } = req.query;
+    const inquiry: AdminOrderInquiry = {
+      page: Number(page) || 1,
+      limit: Number(limit) || 10,
+      orderStatus: orderStatus as OrderStatus | undefined,
+      search: search ? String(search) : undefined,
+    };
+    const result = await orderService.getAllOrdersByAdmin(inquiry);
+    res.status(HttpCode.OK).json({ data: result });
+  } catch (err) {
+    console.log("Error, getAllOrdersByAdmin:", err);
+    if (err instanceof Errors) res.status(err.code).json(err);
+    else res.status(Errors.standard.code).json(Errors.standard);
+  }
+}
 
 export default orderController;

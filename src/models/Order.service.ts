@@ -8,7 +8,7 @@ import { OrderStatus, OrderTab } from "../libs/enums/order.enum";
 import Errors, { HttpCode, Message } from "../libs/Errors";
 import { T } from "../libs/types/common";
 import { Member } from "../libs/types/member";
-import { Order, OrderInput, OrderInquiry } from "../libs/types/order";
+import { AdminOrderInquiry, Order, OrderInput, OrderInquiry } from "../libs/types/order";
 import OrderModel from "../schema/Order.model";
 import VehicleModel from "../schema/Vehicle.model";
 
@@ -133,6 +133,50 @@ class OrderService {
       completedLeases: stats.completedLeases[0]?.count ?? 0,
       monthlyTotal: Math.round(stats.monthlyTotal[0]?.total ?? 0),
     };
+  }
+
+  public async getAllOrdersByAdmin(inquiry: AdminOrderInquiry): Promise<{data: Order[], total: number}> {
+    const match: T = {};
+    if (inquiry.orderStatus) match.orderStatus = inquiry.orderStatus;
+    if (inquiry.search) match.search = { "memberData.memberNick": { $regex: new RegExp(inquiry.search, "i") } }
+
+    const pipeline: any[] = [
+      { $match: match },
+      { $sort: { createdAt: -1 } },
+      { $lookup: { from: "members", localField: "memberId", foreignField: "_id", as: "memberData" } },
+      { $unwind: { path: "$memberData", preserveNullAndEmptyArrays: true } },
+      { $lookup: { from: "vehicles", localField: "vehicleId", foreignField: "_id", as: "vehicleData" } },
+      { $unwind: { path: "$vehicleData", preserveNullAndEmptyArrays: true } },
+    ];
+
+    if (inquiry.search) {
+      pipeline.push({
+        $match: { "memberData.memberNick": { $regex: new RegExp(inquiry.search, "i") } },
+      });
+    }
+    pipeline.push({
+      $facet: {
+        data: [
+          { $skip: (inquiry.page - 1) * inquiry.limit },
+          { $limit: inquiry.limit },
+          {
+            $project: {
+              orderStatus: 1, orderLeaseTerm: 1, orderStartDate: 1, orderTotal: 1, createdAt: 1,
+              "memberData.memberNick": 1, "memberData.memberPhone": 1,
+              "vehicleData.vehicleBrand": 1, "vehicleData.vehicleModel": 1,
+            },
+          },
+        ],
+        metaCounter: [{ $count: "total" }],
+      },
+    });
+
+    const [result] = await this.orderModel.aggregate(pipeline).exec();
+
+    return {
+      data: (result?.data ?? []) as Order[],
+      total: result?.metaCounter[0]?.total ?? 0
+    } ;
   }
 }
 

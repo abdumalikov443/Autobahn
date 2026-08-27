@@ -3,6 +3,8 @@ import adminController from './controllers/admin.controller';
 import vehicleController from './controllers/vehicle.controller';
 import makeUploader from './libs/utils/uploader';
 import reviewController from './controllers/review.controller';
+import router from './router';
+import orderController from './controllers/order.controller';
 
 const routerAdmin = express.Router();
 
@@ -67,5 +69,9 @@ routerAdmin
         adminController.verifyAdmin,
         adminController.updateChosenUser
     );
+
+/** ORDER **/
+routerAdmin
+    .get('/order/all', adminController.verifyAdmin, orderController.getAllOrdersByAdmin)
 
 export default routerAdmin;
