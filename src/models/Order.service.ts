@@ -25,6 +25,22 @@ class OrderService {
   }
 
   public async createOrder(member: Member, input: OrderInput): Promise<Order> {
+    // Validate EVERYTHING before touching stock. Decrementing first meant a
+    // rejected date (past / unparseable) still consumed a unit, because the
+    // throw skipped the rollback that only guarded order creation.
+    const startDate = new Date(input.orderStartDate);
+    if (isNaN(startDate.getTime())) {
+      throw new Errors(HttpCode.BAD_REQUEST, Message.INVALID_DATE);
+    }
+    if (startDate < new Date()) {
+      throw new Errors(HttpCode.BAD_REQUEST, Message.DATE_IN_PAST);
+    }
+
+    const discount = LEASE_DISCOUNTS[input.orderLeaseTerm];
+    if (discount === undefined) {
+      throw new Errors(HttpCode.BAD_REQUEST, Message.CREATE_FAILED);
+    }
+
     // Only an ACTIVE car with stock can be leased. Sold-out cars stay visible in
     // the catalogue, so this is the gate that actually stops the order — and it
     // also blocks a PAUSED listing that still happens to have units.
@@ -41,17 +57,8 @@ class OrderService {
       .exec();
     if (!vehicle) throw new Errors(HttpCode.BAD_REQUEST, Message.OUT_OF_STOCK);
 
-    const discount = LEASE_DISCOUNTS[input.orderLeaseTerm];
     const monthlyRate = vehicle.vehiclePrice * (1 - discount);
     const orderTotal = Math.round(monthlyRate * input.orderLeaseTerm);
-
-    const startDate = new Date(input.orderStartDate);
-    if (isNaN(startDate.getTime())) {
-      throw new Errors(HttpCode.BAD_REQUEST, Message.INVALID_DATE);
-    }
-    if (startDate < new Date()) {
-      throw new Errors(HttpCode.BAD_REQUEST, Message.DATE_IN_PAST);
-    }
 
     const newOrder = {
       memberId: member._id,
