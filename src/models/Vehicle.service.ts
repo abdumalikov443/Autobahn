@@ -95,7 +95,7 @@ class VehicleService {
         {
           $facet: {
             data: [{ $skip: (inquiry.page * 1 - 1) * inquiry.limit }, { $limit: inquiry.limit * 1 },],
-            metaCounter: [{ $count: 'total '}],
+            metaCounter: [{ $count: 'total'}],
           },
         },
       ]).exec();
