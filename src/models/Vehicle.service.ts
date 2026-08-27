@@ -1,11 +1,12 @@
 import { ObjectId } from "mongoose";
 import VehicleModel from "../schema/Vehicle.model";
 import { ReviewStatus } from "../libs/enums/review.enum";
-import { shapeIntoMongooseObjectId } from "../libs/config";
+import { shapeIntoMongooseObjectId, VISIBLE_VEHICLE_STATUSES } from "../libs/config";
 import Errors, { HttpCode, Message } from "../libs/Errors";
 import { VehicleSortBy, VehicleStatus } from "../libs/enums/vehicle.enum";
 import { T } from "../libs/types/common";
 import {
+  AdminVehicleInquiry,
   Vehicle,
   VehicleInput,
   VehicleInquiry,
@@ -28,7 +29,7 @@ class VehicleService {
 
   public async getTopVehicles(): Promise<Vehicle[]> {
     const match: T = {
-      vehicleStatus: VehicleStatus.ACTIVE,
+      vehicleStatus: { $in: VISIBLE_VEHICLE_STATUSES },
       vehicleRentedCount: { $gte: 1 },
       vehicleViews: { $gte: 1 },
     };
@@ -67,7 +68,8 @@ class VehicleService {
 
   public async getVehicles(inquiry: VehicleInquiry): Promise<Vehicle[]> {
     console.log(inquiry);
-    const match: T = { vehicleStatus: VehicleStatus.ACTIVE };
+    // Sold-out cars stay in the catalogue — the client shows them as unavailable.
+    const match: T = { vehicleStatus: { $in: VISIBLE_VEHICLE_STATUSES } };
 
     if (inquiry.vehicleType) match.vehicleType = inquiry.vehicleType;
     if (inquiry.search) {
@@ -113,7 +115,7 @@ class VehicleService {
     let result = await this.vehicleModel
       .findOne({
         _id: vehicleId,
-        vehicleStatus: VehicleStatus.ACTIVE,
+        vehicleStatus: { $in: VISIBLE_VEHICLE_STATUSES },
       })
       .exec();
     if (!result) throw new Errors(HttpCode.NOT_FOUND, Message.NO_DATA_FOUND);
@@ -143,14 +145,48 @@ class VehicleService {
   }
 
   /* BSSR */
-  public async getAllVehicles(): Promise<Vehicle[]> {
-    const result = await this.vehicleModel.find().exec();
-    if (!result) throw new Errors(HttpCode.NOT_FOUND, Message.NO_DATA_FOUND);
+  public async getAllVehicles(
+    inquiry: AdminVehicleInquiry,
+  ): Promise<{ data: Vehicle[]; total: number }> {
+    const match: T = {};
+    if (inquiry.vehicleType) match.vehicleType = inquiry.vehicleType;
+    if (inquiry.vehicleStatus) match.vehicleStatus = inquiry.vehicleStatus;
+    if (inquiry.search) {
+      const rgx = new RegExp(inquiry.search, "i");
+      match.$or = [{ vehicleBrand: { $regex: rgx } }, { vehicleModel: { $regex: rgx } }];
+    }
 
-    return result as unknown as Vehicle[];
+    const [result] = await this.vehicleModel
+      .aggregate([
+        { $match: match },
+        { $sort: { createdAt: -1 } },
+        {
+          $facet: {
+            data: [
+              { $skip: (inquiry.page - 1) * inquiry.limit },
+              { $limit: inquiry.limit },
+            ],
+            metaCounter: [{ $count: "total" }],
+          },
+        },
+      ])
+      .exec();
+
+    return {
+      data: (result?.data ?? []) as Vehicle[],
+      total: result?.metaCounter[0]?.total ?? 0,
+    };
   }
 
   public async createNewVehicle(input: VehicleInput): Promise<Vehicle> {
+    // A new car must arrive with real stock — 0 would mean it is sold out on day one.
+    if (!Number.isFinite(Number(input.vehicleQuantity)) || Number(input.vehicleQuantity) < 1) {
+      throw new Errors(HttpCode.BAD_REQUEST, Message.INVALID_QUANTITY);
+    }
+
+    // Every listing starts paused; an admin reviews it and activates it by hand.
+    input.vehicleStatus = VehicleStatus.PAUSED;
+
     try {
       return (await this.vehicleModel.create(input)) as unknown as Vehicle;
     } catch (err) {
@@ -165,6 +201,17 @@ class VehicleService {
   ): Promise<Vehicle> {
     // string --> ObjectId
     id = shapeIntoMongooseObjectId(id);
+
+    // Server-side guard: the table hides "Set active" on a sold-out car, but a
+    // direct POST must not be able to put a zero-stock listing back in the catalogue.
+    if (input.vehicleStatus === VehicleStatus.ACTIVE) {
+      const current = await this.vehicleModel
+        .findById(id, { vehicleQuantity: 1 })
+        .exec();
+      const quantity = input.vehicleQuantity ?? current?.vehicleQuantity ?? 0;
+      if (Number(quantity) <= 0) input.vehicleStatus = VehicleStatus.OUT_OF_STOCK;
+    }
+
     const result = await this.vehicleModel
       .findOneAndUpdate({ _id: id }, input, { new: true })
       .exec();

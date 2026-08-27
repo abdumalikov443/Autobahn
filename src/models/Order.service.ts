@@ -7,6 +7,7 @@ import {
   UNAVAILABLE_STATUSES,
 } from "../libs/config";
 import { OrderStatus, OrderTab } from "../libs/enums/order.enum";
+import { VehicleStatus } from "../libs/enums/vehicle.enum";
 import Errors, { HttpCode, Message } from "../libs/Errors";
 import { T } from "../libs/types/common";
 import { Member } from "../libs/types/member";
@@ -24,9 +25,16 @@ class OrderService {
   }
 
   public async createOrder(member: Member, input: OrderInput): Promise<Order> {
+    // Only an ACTIVE car with stock can be leased. Sold-out cars stay visible in
+    // the catalogue, so this is the gate that actually stops the order — and it
+    // also blocks a PAUSED listing that still happens to have units.
     const vehicle = await this.vehicleModel
       .findOneAndUpdate(
-        { _id: input.vehicleId, vehicleQuantity: { $gt: 0 } },
+        {
+          _id: input.vehicleId,
+          vehicleStatus: VehicleStatus.ACTIVE,
+          vehicleQuantity: { $gt: 0 },
+        },
         { $inc: { vehicleQuantity: -1 } },
         { new: false },
       )
@@ -55,7 +63,9 @@ class OrderService {
       orderStatus: OrderStatus.CREATED,
     };
     try {
-      return (await this.orderModel.create(newOrder)) as unknown as Order;
+      const order = await this.orderModel.create(newOrder);
+      await this.syncVehicleAvailability(vehicle._id);
+      return order as unknown as Order;
     } catch (err) {
       await this.vehicleModel.updateOne(
         { _id: vehicle._id },
@@ -63,6 +73,34 @@ class OrderService {
       );
       console.log("Error, model: createOrder:", err);
       throw new Errors(HttpCode.BAD_REQUEST, Message.CREATE_FAILED);
+    }
+  }
+
+  /**
+   * Keeps vehicleStatus in step with stock after every quantity change:
+   * the last unit leaving takes an ACTIVE car out of the catalogue, and a
+   * restock brings it back. Restoring happens ONLY from OUT_OF_STOCK, so an
+   * admin's deliberate PAUSE or DELETED is never overridden.
+   */
+  private async syncVehicleAvailability(vehicleId: any): Promise<void> {
+    const vehicle = await this.vehicleModel
+      .findById(vehicleId, { vehicleQuantity: 1, vehicleStatus: 1 })
+      .exec();
+    if (!vehicle) return;
+
+    if (vehicle.vehicleQuantity <= 0 && vehicle.vehicleStatus === VehicleStatus.ACTIVE) {
+      await this.vehicleModel.updateOne(
+        { _id: vehicleId },
+        { vehicleStatus: VehicleStatus.OUT_OF_STOCK },
+      );
+    } else if (
+      vehicle.vehicleQuantity > 0 &&
+      vehicle.vehicleStatus === VehicleStatus.OUT_OF_STOCK
+    ) {
+      await this.vehicleModel.updateOne(
+        { _id: vehicleId },
+        { vehicleStatus: VehicleStatus.ACTIVE },
+      );
     }
   }
 
@@ -158,6 +196,7 @@ class OrderService {
       { _id: order.vehicleId },
       { $inc: { vehicleQuantity: 1 } }
     );
+    await this.syncVehicleAvailability(order.vehicleId);
 
     return order as unknown as Order;
   }
@@ -167,7 +206,8 @@ class OrderService {
   public async getAllOrdersByAdmin(inquiry: AdminOrderInquiry): Promise<{data: Order[], total: number}> {
     const match: T = {};
     if (inquiry.orderStatus) match.orderStatus = inquiry.orderStatus;
-    if (inquiry.search) match.search = { "memberData.memberNick": { $regex: new RegExp(inquiry.search, "i") } }
+    // NOTE: the search filter runs after the $lookup stages below — it cannot live in
+    // this pre-lookup $match, because memberData does not exist yet at this point.
 
     const pipeline: any[] = [
       { $match: match },
@@ -179,8 +219,15 @@ class OrderService {
     ];
 
     if (inquiry.search) {
+      const rgx = new RegExp(inquiry.search, "i");
       pipeline.push({
-        $match: { "memberData.memberNick": { $regex: new RegExp(inquiry.search, "i") } },
+        $match: {
+          $or: [
+            { "memberData.memberNick": { $regex: rgx } },
+            { "vehicleData.vehicleBrand": { $regex: rgx } },
+            { "vehicleData.vehicleModel": { $regex: rgx } },
+          ],
+        },
       });
     }
     pipeline.push({
@@ -190,9 +237,12 @@ class OrderService {
           { $limit: inquiry.limit },
           {
             $project: {
-              orderStatus: 1, orderLeaseTerm: 1, orderStartDate: 1, orderTotal: 1, createdAt: 1,
-              "memberData.memberNick": 1, "memberData.memberPhone": 1,
-              "vehicleData.vehicleBrand": 1, "vehicleData.vehicleModel": 1,
+              orderStatus: 1, orderLeaseTerm: 1, orderStartDate: 1, orderTotal: 1,
+              orderDeliveryLocation: 1, createdAt: 1,
+              "memberData._id": 1, "memberData.memberNick": 1, "memberData.memberPhone": 1,
+              "vehicleData._id": 1, "vehicleData.vehicleBrand": 1,
+              "vehicleData.vehicleModel": 1, "vehicleData.vehicleType": 1,
+              "vehicleData.vehicleImages": 1,
             },
           },
         ],
@@ -235,6 +285,16 @@ class OrderService {
       await this.vehicleModel.updateOne(
         { _id: order.vehicleId },
         { $inc: { vehicleQuantity: -1 } }
+      );
+    }
+    // Either branch moved stock, so reconcile the listing's availability.
+    if ((wasUnavailable && isNowAvailable) || (wasAvailable && isNowUnavailable)) {
+      await this.syncVehicleAvailability(order.vehicleId);
+    }
+    if (oldStatus === OrderStatus.PROCESSING && newStatus === OrderStatus.FINISHED) {
+      await this.vehicleModel.updateOne(
+        { _id: order.vehicleId },
+        { $inc: { vehicleRentedCount: 1 } }
       );
     }
       

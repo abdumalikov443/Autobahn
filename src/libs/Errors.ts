@@ -25,6 +25,7 @@ export enum Message {
     INVALID_DATE = "Please insert a valid date!",
     DATE_IN_PAST = "You are inserting a past date, please choose upcoming dates!",
     OUT_OF_STOCK = "This vehicle is Out Of Stock",
+    INVALID_QUANTITY = "Quantity must be at least 1!",
     CANNOT_CANCEL = "You cannot cancel this order, please contact with admin!"
 }
 

@@ -1,71 +1,71 @@
 <%- include('includes/header') %>
 
-  <main class="container">
-    <!-- Page head -->
-    <div class="page-head d-flex flex-wrap justify-content-between align-items-end gap-3">
-      <div>
-        <p class="eyebrow mb-1">Member Management</p>
-        <h1 class="section-title">Users</h1>
-        <p class="text-muted-2 mb-0">Review members, activate accounts, block abuse or remove users.</p>
+<main class="container">
+  <!-- Page head -->
+  <div class="page-head d-flex flex-wrap justify-content-between align-items-end gap-3">
+    <div>
+      <p class="eyebrow mb-1">Member Management</p>
+      <h1 class="section-title">Users</h1>
+      <p class="text-muted-2 mb-0">Review members, activate accounts, block abuse or remove users.</p>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar my-4">
+    <span class="chip active" data-status="all">All</span>
+    <span class="chip" data-status="ACTIVE">Active</span>
+    <span class="chip" data-status="BLOCK">Blocked</span>
+    <span class="chip" data-status="DELETE">Deleted</span>
+
+    <div class="ms-auto d-flex align-items-center gap-2 flex-wrap">
+      <select id="leaseFilter" class="form-select" style="width: 140px;">
+        <option value="all">All members</option>
+        <option value="withLease">With active leases</option>
+        <option value="noLease">No active lease</option>
+      </select>
+      <div class="ab-search">
+        <i class="bi bi-search"></i>
+        <input id="searchInput" class="form-control" placeholder="Search users…" />
       </div>
     </div>
+  </div>
 
-    <!-- Toolbar -->
-    <div class="toolbar my-4">
-      <span class="chip active">All</span>
-      <span class="chip">Active</span>
-      <span class="chip">Blocked</span>
-      <div class="ms-auto position-relative" style="min-width: 220px;">
-        <i class="bi bi-search position-absolute text-muted-2" style="left: 8px; top: 11px;"></i>
-        <input class="form-control ps-4" style="left: 10px;" placeholder=" Search users…" />
-      </div>
+  <!-- Table -->
+  <div class="ab-card ab-table-wrap">
+    <div class="table-responsive">
+      <table class="table ab-table align-middle">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Address</th>
+            <th>Active Leases</th>
+            <th>Member Since</th>
+            <th>Status</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="userTableBody"></tbody>
+      </table>
     </div>
+  </div>
 
-    <!-- Table -->
-    <div class="ab-card ab-table-wrap">
-      <div class="table-responsive">
-        <table class="table ab-table align-middle">
-          <thead>
-            <tr>
-              <th>User</th>
-              <th>Membership</th>
-              <th>Active Leases</th>
-              <th>Member Since</th>
-              <th>Status</th>
-              <th class="text-end">Actions</th>
-            </tr>
-          </thead>
-          <% users.map((value)=> { %>
-          <tbody>
-
-            <tr>
-              <td>
-                <div class="veh-cell">
-                  <span class="ab-avatar">AA</span>
-                  <span>
-                    <span class="veh-name d-block"><%= value.memberNick %></span>
-                    <span class="text-muted-2" style="font-size:13px;"><%= value.memberPhone %></span>
-                  </span>
-                </div>
-              </td>
-              <td>Autobahn Black</td>
-              <td>2</td>
-              <td><%= value.createdAt %></td>
-              <td><span class="ab-badge badge-active"><%= value.memberStatus %></span></td>
-              <td class="text-end">
-                <a class="act-btn act-activate" title="Activate" href="#"><i class="bi bi-check-lg"></i></a>
-                <a class="act-btn act-block" title="Block" href="#"><i class="bi bi-slash-circle"></i></a>
-                <a class="act-btn act-delete" title="Delete" href="#"><i class="bi bi-trash"></i></a>
-              </td>
-            </tr>
-            
-          </tbody>
-          <% } ) %>
-        </table>
-      </div>
+  <!-- Pagination -->
+  <div class="ab-pager d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <p class="ab-result-count text-muted-2 mb-0" id="resultCount"></p>
+    <div class="d-flex align-items-center gap-2">
+      <button class="btn btn-outline-ink btn-sm" id="prevPage" disabled>
+        <i class="bi bi-chevron-left"></i> Prev
+      </button>
+      <span class="text-muted-2" id="pageLabel" style="font-size:13px;"></span>
+      <button class="btn btn-outline-ink btn-sm" id="nextPage" disabled>
+        Next <i class="bi bi-chevron-right"></i>
+      </button>
     </div>
-  </main>
+  </div>
+</main>
 
-  <%- include('includes/footer') %>
+<%- include('includes/footer') %>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/config.js"></script>
+<script src="/js/users.js"></script>

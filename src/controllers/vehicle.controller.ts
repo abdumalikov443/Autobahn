@@ -3,8 +3,9 @@ import { T } from "../libs/types/common";
 import { Request, Response } from "express";
 import VehicleService from "../models/Vehicle.service";
 import { AdminRequest, MemberRequest } from "../libs/types/member";
-import { VehicleInput, VehicleInquiry } from "../libs/types/vehicle";
-import { VehicleSortBy, VehicleType } from "../libs/enums/vehicle.enum";
+import { AdminVehicleInquiry, VehicleInput, VehicleInquiry } from "../libs/types/vehicle";
+import { VehicleSortBy, VehicleStatus, VehicleType } from "../libs/enums/vehicle.enum";
+import { wantsJson } from "../libs/config";
 
 const vehicleService = new VehicleService();
 
@@ -74,11 +75,26 @@ vehicleController.getVehicle = async (req: MemberRequest, res: Response) => {
 
 /* BSSR */
 
+/**
+ * Serves the browser the EJS page, and that page's fetch() the paginated rows.
+ * Query params (JSON mode): page, limit, vehicleType, vehicleStatus, search.
+ */
 vehicleController.getAllVehicles = async (req: Request, res: Response) => {
     try {
         console.log("--getAllVehicles--");
-        const data = await vehicleService.getAllVehicles();
-        res.render("vehicles", {vehicles: data});
+        if (!wantsJson(req)) return res.render("vehicles", { page: "vehicles" });
+
+        const { page, limit, vehicleType, vehicleStatus, search } = req.query;
+        const inquiry: AdminVehicleInquiry = {
+            page: Number(page) || 1,
+            limit: Number(limit) || 10,
+            vehicleType: vehicleType ? (vehicleType as VehicleType) : undefined,
+            vehicleStatus: vehicleStatus ? (vehicleStatus as VehicleStatus) : undefined,
+            search: search ? String(search) : undefined,
+        };
+
+        const result = await vehicleService.getAllVehicles(inquiry);
+        res.status(HttpCode.OK).json({ data: result });
     } catch (err) {
         console.log("Error, getAllVehicles:", err);
         if (err instanceof Errors) res.status(err.code).json(err);
@@ -87,31 +103,47 @@ vehicleController.getAllVehicles = async (req: Request, res: Response) => {
 };
 
 
+/**
+ * Turns a multipart body into a VehicleInput.
+ * The modal sends vehicleSpecs as a JSON string because multipart has no nested objects,
+ * and mongoose will not auto-parse a string into a nested schema.
+ */
+const buildVehicleInput = (req: AdminRequest): VehicleInput => {
+    if (!req.files?.length)
+        throw new Errors(HttpCode.BAD_REQUEST, Message.CREATE_FAILED);
+
+    const data: VehicleInput = req.body;
+    if (typeof data.vehicleSpecs === "string") {
+        try {
+            data.vehicleSpecs = JSON.parse(req.body.vehicleSpecs);
+        } catch (err) {
+            throw new Errors(HttpCode.BAD_REQUEST, Message.CREATE_FAILED);
+        }
+    }
+
+    data.vehicleImages = req.files.map((ele) => ele.path.replace(/\\/g, "/"));
+    return data;
+};
+
+
 vehicleController.createNewVehicle = async (req: AdminRequest, res: Response) => {
     try {
         console.log("--createNewVehicle--");
-        if (!req.files?.length)
-            throw new Errors(HttpCode.INTERNAL_SERVER_ERROR, Message.CREATE_FAILED);
+        const data = buildVehicleInput(req);
+        const result = await vehicleService.createNewVehicle(data);
 
-        const data: VehicleInput = req.body;
-        if (typeof data.vehicleSpecs === 'string') {
-            try {  // mongoose won't auto-parse a JSON string into a nested schema so that's why we need to parse it manually
-                data.vehicleSpecs = JSON.parse(req.body.vehicleSpecs);
-            } catch (err) {
-                return res.status(400).json({ message: 'vehicleSpecs must be valid JSON' });
-            }
-        }
-
-        data.vehicleImages = req.files.map(ele => {
-            return ele.path.replace(/\\/g, "/");
-        });
-
-        await vehicleService.createNewVehicle(data);
+        // The Add-vehicle modal posts with fetch and wants JSON; a plain form post
+        // still gets the original alert + redirect.
+        if (wantsJson(req)) return res.status(HttpCode.CREATED).json({ data: result });
         res.send(
             `<script> alert("Successful creation"); window.location.replace('/admin/vehicle/all') </script>`
         );
     } catch (err) {
         console.log("Error, createNewVehicle:", err);
+        if (wantsJson(req)) {
+            if (err instanceof Errors) return res.status(err.code).json(err);
+            return res.status(Errors.standard.code).json(Errors.standard);
+        }
         const message = err instanceof Errors ? err.message : Message.SOMETHING_WENT_WRONG;
         res.send(
             `<script> alert("${message}"); window.location.replace('/admin/vehicle/all') </script>`

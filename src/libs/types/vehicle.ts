@@ -27,6 +27,16 @@ export interface VehicleInquiry {
 }
 
 
+/** Admin fleet table: server-side paging + filtering. */
+export interface AdminVehicleInquiry {
+  page: number;
+  limit: number;
+  vehicleType?: VehicleType;
+  vehicleStatus?: VehicleStatus;
+  search?: string;
+}
+
+
 export interface VehicleInput {
   vehicleStatus?: VehicleStatus;
   vehicleType: VehicleType;

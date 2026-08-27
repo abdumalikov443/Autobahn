@@ -1,0 +1,73 @@
+<%- include('includes/header') %>
+
+<main class="container">
+  <!-- Page head -->
+  <div class="page-head d-flex flex-wrap justify-content-between align-items-end gap-3">
+    <div>
+      <p class="eyebrow mb-1">Lease Operations</p>
+      <h1 class="section-title">Orders</h1>
+      <p class="text-muted-2 mb-0">Track every lease — move an order into processing, close it out or cancel it.</p>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar my-4">
+    <span class="chip active" data-status="all">All</span>
+    <span class="chip" data-status="CREATED">Created</span>
+    <span class="chip" data-status="PROCESSING">Processing</span>
+    <span class="chip" data-status="FINISHED">Finished</span>
+    <span class="chip" data-status="CANCELLED">Cancelled</span>
+
+    <div class="ms-auto d-flex align-items-center gap-2 flex-wrap">
+      <select id="limitFilter" class="form-select" style="width: 140px;">
+        <option value="10">10 per page</option>
+        <option value="25">25 per page</option>
+        <option value="50">50 per page</option>
+      </select>
+      <div class="ab-search">
+        <i class="bi bi-search"></i>
+        <input id="searchInput" class="form-control" placeholder="Search member or car…" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="ab-card ab-table-wrap">
+    <div class="table-responsive">
+      <table class="table ab-table align-middle">
+        <thead>
+          <tr>
+            <th>Vehicle</th>
+            <th>Member</th>
+            <th>Lease Period</th>
+            <th>Start Date</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="orderTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div class="ab-pager d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <p class="ab-result-count text-muted-2 mb-0" id="resultCount"></p>
+    <div class="d-flex align-items-center gap-2">
+      <button class="btn btn-outline-ink btn-sm" id="prevPage" disabled>
+        <i class="bi bi-chevron-left"></i> Prev
+      </button>
+      <span class="text-muted-2" id="pageLabel" style="font-size:13px;"></span>
+      <button class="btn btn-outline-ink btn-sm" id="nextPage" disabled>
+        Next <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </div>
+</main>
+
+<%- include('includes/footer') %>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/config.js"></script>
+<script src="/js/orders.js"></script>

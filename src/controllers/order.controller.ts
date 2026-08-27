@@ -5,6 +5,7 @@ import Errors, { HttpCode } from "../libs/Errors";
 import OrderService from "../models/Order.service";
 import { AdminOrderInquiry, AdminOrderUpdateInput, OrderInquiry } from "../libs/types/order";
 import { OrderStatus, OrderTab } from "../libs/enums/order.enum";
+import { wantsJson } from "../libs/config";
 
 const orderService = new OrderService();
 const orderController: T = {};
@@ -69,9 +70,16 @@ orderController.cancelMyOrder = async (req: MemberRequest, res: Response) => {
 };
 
 /** BSSR **/
+
+/**
+ * Serves the browser the EJS page, and that page's fetch() the paginated rows.
+ * Query params (JSON mode): page, limit, orderStatus, search.
+ */
 orderController.getAllOrdersByAdmin = async (req: AdminRequest, res: Response) => {
   try {
     console.log("getAllOrdersByAdmin");
+    if (!wantsJson(req)) return res.render("orders", { page: "orders" });
+
     const { page, limit, orderStatus, search } = req.query;
     const inquiry: AdminOrderInquiry = {
       page: Number(page) || 1,
@@ -93,8 +101,8 @@ orderController.updateOrderByAdmin = async (req: AdminRequest, res: Response) =>
     console.log("updateOrderByAdmin");
     const input: AdminOrderUpdateInput = req.body;
     const result = await orderService.updateOrderByAdmin(input)
-    
-    res.status(HttpCode.OK).json(result);
+
+    res.status(HttpCode.OK).json({ data: result });
   } catch (err) {
     console.log("Error, updateOrderByAdmin:", err);
     if (err instanceof Errors) res.status(err.code).json(err);

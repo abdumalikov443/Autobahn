@@ -18,7 +18,7 @@ routerAdmin
 routerAdmin
     .get('/signup', adminController.getSignup)
     .post(
-        '/signup', 
+        '/signup',
         makeUploader("members").single("memberImage"),
         adminController.processSignup
     );
@@ -31,18 +31,18 @@ routerAdmin
 /** VEHICLE **/
 routerAdmin
     .get(
-        '/vehicle/all', 
-        // adminController.verifyAdmin, 
+        '/vehicle/all',
+        adminController.verifyAdmin,
         vehicleController.getAllVehicles
     )
     .post(
-        '/vehicle/create', 
+        '/vehicle/create',
         adminController.verifyAdmin,
         makeUploader("vehicles").array("vehicleImages", 5),
         vehicleController.createNewVehicle
     )
     .post(
-        '/vehicle/update/:id', 
+        '/vehicle/update/:id',
         adminController.verifyAdmin,
         vehicleController.updateChosenVehicle
     );
@@ -51,17 +51,22 @@ routerAdmin
 /** REVIEW **/
 routerAdmin
     .get(
-        '/review/all', 
-        adminController.verifyAdmin, 
+        '/review/all',
+        adminController.verifyAdmin,
         reviewController.getAllReviews
+    )
+    .post(
+        '/review/update/:id',
+        adminController.verifyAdmin,
+        reviewController.updateChosenReview
     )
 
 
 /** USER **/
 routerAdmin
     .get(
-        "/user/all", 
-        // adminController.verifyAdmin, 
+        "/user/all",
+        adminController.verifyAdmin,
         adminController.getUsers
     )
     .post(
@@ -72,7 +77,15 @@ routerAdmin
 
 /** ORDER **/
 routerAdmin
-    .get('/order/all', adminController.verifyAdmin, orderController.getAllOrdersByAdmin)
-    .post('/order/update/', adminController.verifyAdmin, orderController.updateOrderByAdmin)
+    .get(
+        '/order/all',
+        adminController.verifyAdmin,
+        orderController.getAllOrdersByAdmin
+    )
+    .post(
+        '/order/update/',
+        adminController.verifyAdmin,
+        orderController.updateOrderByAdmin
+    )
 
 export default routerAdmin;

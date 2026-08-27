@@ -30,6 +30,16 @@ export interface MemberInput {
 }
 
 
+/** Admin users table: server-side paging + filtering. */
+export interface AdminUserInquiry {
+    page: number;
+    limit: number;
+    memberStatus?: MemberStatus;
+    lease?: "withLease" | "noLease";
+    search?: string;
+}
+
+
 export interface LoginInput {
     memberNick: string;
     memberPassword: string;

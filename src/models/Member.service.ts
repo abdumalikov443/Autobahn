@@ -1,9 +1,10 @@
 import bcrypt from "bcryptjs";
 import { MemberStatus, MemberType } from "../libs/enums/member.enum";
 import Errors, { HttpCode, Message } from "../libs/Errors";
-import { Member, MemberInput, LoginInput, MemberUpdateInput } from "../libs/types/member";
+import { AdminUserInquiry, Member, MemberInput, LoginInput, MemberUpdateInput } from "../libs/types/member";
+import { T } from "../libs/types/common";
 import MemberModel from "../schema/Member.model";
-import { shapeIntoMongooseObjectId } from "../libs/config";
+import { ACTIVE_STATUSES, shapeIntoMongooseObjectId } from "../libs/config";
 
 class MemberService {
     private readonly memberModel;
@@ -109,23 +110,78 @@ class MemberService {
         return await this.memberModel.findById(member._id).exec() as unknown as Member;
     }
 
-    public async getUsers(): Promise<Member[]> {
-        const result = await this.memberModel
-            .find({ memberType: MemberType.USER })
-            .exec();
+    public async getUsers(
+        inquiry: AdminUserInquiry
+    ): Promise<{ data: Member[]; total: number }> {
+        const match: T = { memberType: MemberType.USER };
+        if (inquiry.memberStatus) match.memberStatus = inquiry.memberStatus;
+        if (inquiry.search) {
+            const rgx = new RegExp(inquiry.search, "i");
+            match.$or = [{ memberNick: { $regex: rgx } }, { memberPhone: { $regex: rgx } }];
+        }
 
-        if(!result)
-            throw new Errors(HttpCode.NOT_FOUND, Message.NO_DATA_FOUND);
-        return result as unknown as Member[];
+        // The lease join runs BEFORE $facet so an activeLeases filter can narrow the
+        // set that metaCounter counts — otherwise the pager would report a total the
+        // filtered rows never add up to.
+        const pipeline: any[] = [
+            { $match: match },
+            {
+                $lookup: {
+                    from: "orders",
+                    let: { memberId: "$_id" },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: { $eq: ["$memberId", "$$memberId"] },
+                                orderStatus: { $in: ACTIVE_STATUSES },
+                            },
+                        },
+                        { $count: "count" },
+                    ],
+                    as: "activeOrders",
+                },
+            },
+            {
+                $addFields: {
+                    activeLeases: {
+                        $ifNull: [{ $arrayElemAt: ["$activeOrders.count", 0] }, 0],
+                    },
+                },
+            },
+        ];
+
+        if (inquiry.lease === "withLease") pipeline.push({ $match: { activeLeases: { $gt: 0 } } });
+        if (inquiry.lease === "noLease") pipeline.push({ $match: { activeLeases: 0 } });
+
+        pipeline.push({
+            $facet: {
+                data: [
+                    { $sort: { createdAt: -1 } },
+                    { $skip: (inquiry.page - 1) * inquiry.limit },
+                    { $limit: inquiry.limit },
+                    // Aggregation bypasses `select: false`, so memberPassword goes out here.
+                    { $project: { activeOrders: 0, memberPassword: 0 } },
+                ],
+                metaCounter: [{ $count: "total" }],
+            },
+        });
+
+        const [result] = await this.memberModel.aggregate(pipeline).exec();
+
+        return {
+            data: (result?.data ?? []) as Member[],
+            total: result?.metaCounter[0]?.total ?? 0,
+        };
     }
 
     public async updateChosenUser(input: MemberUpdateInput): Promise<Member> {
-        input._id = shapeIntoMongooseObjectId(input._id);
+        // _id must stay out of the $set payload — Mongo rejects updates to immutable fields.
+        const { _id, ...changes } = input;
+        const memberId = shapeIntoMongooseObjectId(_id);
 
         const result = await this.memberModel
-            .findOneAndUpdate({_id: input._id}, input, {new: true})
+            .findOneAndUpdate({ _id: memberId }, changes, { new: true })
             .exec();
-        console.log(result);
 
         if (!result) throw new Errors(HttpCode.NOT_MODIFIED, Message.UPDATE_FAILED);
         return result as unknown as Member;
