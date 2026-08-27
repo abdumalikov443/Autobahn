@@ -93,6 +93,62 @@ class ReviewService {
         };
     }
 
+    /**
+     * Approved reviews for the storefront. Passing a vehicleId narrows it to one
+     * car's review list; without it you get the newest approved reviews overall.
+     * PENDING and REJECTED are never exposed publicly.
+     */
+    public async getApprovedReviews(
+        limit: number,
+        vehicleId?: string
+    ): Promise<Review[]> {
+        const match: T = { reviewStatus: ReviewStatus.APPROVED };
+        if (vehicleId) match.vehicleId = shapeIntoMongooseObjectId(vehicleId);
+
+        const result = await this.reviewModel
+            .aggregate([
+                { $match: match },
+                { $sort: { createdAt: -1 } },
+                { $limit: limit },
+                {
+                    $lookup: {
+                        from: "members",
+                        localField: "memberId",
+                        foreignField: "_id",
+                        as: "memberData",
+                    },
+                },
+                { $unwind: { path: "$memberData", preserveNullAndEmptyArrays: true } },
+                {
+                    $lookup: {
+                        from: "vehicles",
+                        localField: "vehicleId",
+                        foreignField: "_id",
+                        as: "vehicleData",
+                    },
+                },
+                { $unwind: { path: "$vehicleData", preserveNullAndEmptyArrays: true } },
+                {
+                    $project: {
+                        content: 1,
+                        rating: 1,
+                        reviewStatus: 1,
+                        createdAt: 1,
+                        "memberData._id": 1,
+                        "memberData.memberNick": 1,
+                        "memberData.memberImage": 1,
+                        "memberData.memberAddress": 1,
+                        "vehicleData._id": 1,
+                        "vehicleData.vehicleBrand": 1,
+                        "vehicleData.vehicleModel": 1,
+                    },
+                },
+            ])
+            .exec();
+
+        return result as unknown as Review[];
+    }
+
     public async createNewReview(member: Member, input: ReviewInput): Promise<Review> {
         try {
             // Fields are whitelisted, not spread: a client sending reviewStatus

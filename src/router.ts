@@ -24,6 +24,7 @@ router
 
 /** REVIEWS **/
 router
+    .get('/review/all', reviewController.getApprovedReviews)
     .post('/review/create', memberController.verifyAuth, reviewController.createNewReview);
 
 

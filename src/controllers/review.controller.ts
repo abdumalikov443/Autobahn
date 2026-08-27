@@ -13,6 +13,29 @@ const reviewController: T = {}
 
 /* SPA */
 
+/**
+ * Public review list. `limit` caps the result (default 4, max 20) and an optional
+ * `vehicleId` narrows it to a single car. Only APPROVED reviews are returned.
+ */
+reviewController.getApprovedReviews = async (req: Request, res: Response) => {
+    try {
+        console.log("--getApprovedReviews--");
+        const { limit, vehicleId } = req.query;
+        const capped = Math.min(Number(limit) || 4, 20);
+
+        const result = await reviewService.getApprovedReviews(
+            capped,
+            vehicleId ? String(vehicleId) : undefined
+        );
+
+        res.status(HttpCode.OK).json({ data: result });
+    } catch (err) {
+        console.log("Error, getApprovedReviews:", err);
+        if (err instanceof Errors) res.status(err.code).json(err);
+        else res.status(Errors.standard.code).json(Errors.standard);
+    }
+};
+
 
 /* BSSR */
 
