@@ -31,7 +31,8 @@ router
 router
     .post('/order/create', memberController.verifyAuth, orderController.createOrder)
     .get('/order/all', memberController.verifyAuth, orderController.getMyOrders)
-    .get('/order/all/overview', memberController.verifyAuth, orderController.getMyOrdersOverview);
+    .get('/order/all/overview', memberController.verifyAuth, orderController.getMyOrdersOverview)
+    .post('/order/cancel/:id', memberController.verifyAuth, orderController.cancelMyOrder);
 
 
 export default router;

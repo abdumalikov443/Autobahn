@@ -73,5 +73,6 @@ routerAdmin
 /** ORDER **/
 routerAdmin
     .get('/order/all', adminController.verifyAdmin, orderController.getAllOrdersByAdmin)
+    .post('/order/update/', adminController.verifyAdmin, orderController.updateOrderByAdmin)
 
 export default routerAdmin;

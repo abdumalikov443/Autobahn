@@ -3,7 +3,7 @@ import { AdminRequest, MemberRequest } from "../libs/types/member";
 import { Response } from "express";
 import Errors, { HttpCode } from "../libs/Errors";
 import OrderService from "../models/Order.service";
-import { AdminOrderInquiry, OrderInquiry } from "../libs/types/order";
+import { AdminOrderInquiry, AdminOrderUpdateInput, OrderInquiry } from "../libs/types/order";
 import { OrderStatus, OrderTab } from "../libs/enums/order.enum";
 
 const orderService = new OrderService();
@@ -55,6 +55,19 @@ orderController.getMyOrdersOverview = async (req: MemberRequest, res: Response) 
   }
 };
 
+orderController.cancelMyOrder = async (req: MemberRequest, res: Response) => {
+  try {
+    console.log("cancelMyOrder");
+    const { id } = req.params;
+    const result = await orderService.cancelMyOrder(req.member, id);
+    res.status(HttpCode.OK).json({ data: result });
+  } catch (err) {
+    console.log("Error, cancelMyOrder:", err);
+    if (err instanceof Errors) res.status(err.code).json(err);
+    else res.status(Errors.standard.code).json(Errors.standard);
+  }
+};
+
 /** BSSR **/
 orderController.getAllOrdersByAdmin = async (req: AdminRequest, res: Response) => {
   try {
@@ -70,6 +83,20 @@ orderController.getAllOrdersByAdmin = async (req: AdminRequest, res: Response) =
     res.status(HttpCode.OK).json({ data: result });
   } catch (err) {
     console.log("Error, getAllOrdersByAdmin:", err);
+    if (err instanceof Errors) res.status(err.code).json(err);
+    else res.status(Errors.standard.code).json(Errors.standard);
+  }
+};
+
+orderController.updateOrderByAdmin = async (req: AdminRequest, res: Response) => {
+  try {
+    console.log("updateOrderByAdmin");
+    const input: AdminOrderUpdateInput = req.body;
+    const result = await orderService.updateOrderByAdmin(input)
+    
+    res.status(HttpCode.OK).json(result);
+  } catch (err) {
+    console.log("Error, updateOrderByAdmin:", err);
     if (err instanceof Errors) res.status(err.code).json(err);
     else res.status(Errors.standard.code).json(Errors.standard);
   }

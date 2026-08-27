@@ -1,14 +1,16 @@
 import {
   ACTIVE_STATUSES,
+  AVAILABLE_STATUSES,
   HISTORY_STATUSES,
   LEASE_DISCOUNTS,
   shapeIntoMongooseObjectId,
+  UNAVAILABLE_STATUSES,
 } from "../libs/config";
 import { OrderStatus, OrderTab } from "../libs/enums/order.enum";
 import Errors, { HttpCode, Message } from "../libs/Errors";
 import { T } from "../libs/types/common";
 import { Member } from "../libs/types/member";
-import { AdminOrderInquiry, Order, OrderInput, OrderInquiry } from "../libs/types/order";
+import { AdminOrderInquiry, AdminOrderUpdateInput, Order, OrderInput, OrderInquiry } from "../libs/types/order";
 import OrderModel from "../schema/Order.model";
 import VehicleModel from "../schema/Vehicle.model";
 
@@ -135,6 +137,33 @@ class OrderService {
     };
   }
 
+  public async cancelMyOrder(member: Member, id: string): Promise<Order> {
+    const orderId = shapeIntoMongooseObjectId(id);
+
+    const order = await this.orderModel.findOne({
+      _id: orderId,
+      memberId: member._id,
+    }).exec();
+
+    if (!order) throw new Errors(HttpCode.NOT_FOUND, Message.NO_DATA_FOUND);
+
+    if (order.orderStatus !== OrderStatus.CREATED) {
+      throw new Errors(HttpCode.BAD_REQUEST, Message.CANNOT_CANCEL);
+    }
+
+    order.orderStatus = OrderStatus.CANCELLED;
+    await order.save();
+
+    await this.vehicleModel.updateOne(
+      { _id: order.vehicleId },
+      { $inc: { vehicleQuantity: 1 } }
+    );
+
+    return order as unknown as Order;
+  }
+
+  /** BSSR **/
+
   public async getAllOrdersByAdmin(inquiry: AdminOrderInquiry): Promise<{data: Order[], total: number}> {
     const match: T = {};
     if (inquiry.orderStatus) match.orderStatus = inquiry.orderStatus;
@@ -177,6 +206,40 @@ class OrderService {
       data: (result?.data ?? []) as Order[],
       total: result?.metaCounter[0]?.total ?? 0
     } ;
+  }
+
+  public async updateOrderByAdmin(input: AdminOrderUpdateInput): Promise<Order> {
+    const orderId = shapeIntoMongooseObjectId(input.orderId);
+    const newStatus = input.orderStatus;
+
+    const order = await this.orderModel.findById(orderId).exec();
+    if (!order) throw new Errors(HttpCode.NOT_FOUND, Message.NO_DATA_FOUND);
+
+    const oldStatus = order.orderStatus;
+
+    order.orderStatus = newStatus;
+    await order.save();
+
+    const wasUnavailable = UNAVAILABLE_STATUSES.includes(oldStatus as OrderStatus);
+    const isNowAvailable = AVAILABLE_STATUSES.includes(newStatus);
+    const wasAvailable = AVAILABLE_STATUSES.includes(oldStatus as OrderStatus);
+    const isNowUnavailable = UNAVAILABLE_STATUSES.includes(newStatus);
+      
+    if (wasUnavailable && isNowAvailable) {
+      await this.vehicleModel.updateOne(
+        { _id: order.vehicleId },
+        { $inc: { vehicleQuantity: 1 } }
+      );
+    }
+    if (wasAvailable && isNowUnavailable) {
+      await this.vehicleModel.updateOne(
+        { _id: order.vehicleId },
+        { $inc: { vehicleQuantity: -1 } }
+      );
+    }
+      
+    if (!order) throw new Errors(HttpCode.NOT_MODIFIED, Message.UPDATE_FAILED);
+    return order as unknown as Order;
   }
 }
 

@@ -19,3 +19,6 @@ export const LEASE_DISCOUNTS: Record<LeaseTerm, number> = {
 
 export const ACTIVE_STATUSES = [OrderStatus.CREATED, OrderStatus.PROCESSING];
 export const HISTORY_STATUSES = [OrderStatus.FINISHED, OrderStatus.CANCELLED];
+
+export const UNAVAILABLE_STATUSES = [OrderStatus.CREATED, OrderStatus.PROCESSING];
+export const AVAILABLE_STATUSES = [OrderStatus.FINISHED, OrderStatus.CANCELLED];

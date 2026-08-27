@@ -39,3 +39,8 @@ export interface AdminOrderInquiry {
   orderStatus?: OrderStatus;   
   search?: string;              
 }
+
+export interface AdminOrderUpdateInput {
+    orderId: string;
+    orderStatus: OrderStatus;
+}
