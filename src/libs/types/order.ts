@@ -1,5 +1,6 @@
 import { ObjectId } from "mongoose";
-import { LeaseTerm, OrderDeliveryLocation, OrderStatus } from "../enums/order.enum";
+import { LeaseTerm, OrderDeliveryLocation, OrderStatus, OrderTab } from "../enums/order.enum";
+import { Vehicle } from "./vehicle";
 
 
 export interface Order {
@@ -13,6 +14,8 @@ export interface Order {
     vehicleId: ObjectId;
     createdAt: Date;
     updatedAt: Date;
+    /** from aggregations **/
+    vehicleData: Vehicle;
 }
 
 export interface OrderInput {
@@ -20,4 +23,10 @@ export interface OrderInput {
     orderDeliveryLocation: OrderDeliveryLocation;
     orderStartDate: Date;
     vehicleId: ObjectId;
+}
+
+export interface OrderInquiry {
+  page: number;
+  limit: number;
+  tab: OrderTab;
 }

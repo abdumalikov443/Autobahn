@@ -3,6 +3,8 @@ import { MemberRequest } from "../libs/types/member";
 import { Response } from "express";
 import Errors, { HttpCode } from "../libs/Errors";
 import OrderService from "../models/Order.service";
+import { OrderInquiry } from "../libs/types/order";
+import { OrderTab } from "../libs/enums/order.enum";
 
 const orderService = new OrderService();
 const orderController: T = {};
@@ -12,9 +14,40 @@ orderController.createOrder = async (req: MemberRequest, res: Response) => {
     console.log("createOrder");
     const result = await orderService.createOrder(req.member, req.body);
 
-    res.status(HttpCode.CREATED).json(result);
+    res.status(HttpCode.CREATED).json({ data: result });
   } catch (err) {
     console.log("Error, createOrder:", err);
+    if (err instanceof Errors) res.status(err.code).json(err);
+    else res.status(Errors.standard.code).json(Errors.standard);
+  }
+};
+
+orderController.getMyOrders = async (req: MemberRequest, res: Response) => {
+  try {
+    console.log("getMyOrders");
+    const { page, limit, tab } = req.query;
+    const inquiry: OrderInquiry = {
+      page: Number(page) || 1,
+      limit: Number(limit) || 5,
+      tab: tab === OrderTab.HISTORY ? OrderTab.HISTORY : OrderTab.ACTIVE, // whitelist
+    };
+
+    const result = await orderService.getMyOrders(req.member, inquiry);
+    res.status(HttpCode.OK).json({ data: result });
+  } catch (err) {
+    console.log("Error, getMyOrders:", err);
+    if (err instanceof Errors) res.status(err.code).json(err);
+    else res.status(Errors.standard.code).json(Errors.standard);
+  }
+};
+
+orderController.getMyOrdersOverview = async (req: MemberRequest, res: Response) => {
+  try {
+    console.log("getMyOrdersOverview");
+    const result = await orderService.getMyOrdersOverview(req.member);
+    res.status(HttpCode.OK).json({ data: result });
+  } catch (err) {
+    console.log("Error, getMyOrdersOverview:", err);
     if (err instanceof Errors) res.status(err.code).json(err);
     else res.status(Errors.standard.code).json(Errors.standard);
   }

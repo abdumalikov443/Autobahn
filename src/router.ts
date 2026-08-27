@@ -29,7 +29,9 @@ router
 
 /** ORDERS **/
 router
-    .post('/order/create', memberController.verifyAuth, orderController.createOrder);
+    .post('/order/create', memberController.verifyAuth, orderController.createOrder)
+    .get('/order/all', memberController.verifyAuth, orderController.getMyOrders)
+    .get('/order/all/overview', memberController.verifyAuth, orderController.getMyOrdersOverview);
 
 
 export default router;
