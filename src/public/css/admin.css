@@ -453,3 +453,28 @@ img.ab-avatar { object-fit: cover; }
   background: var(--danger-soft); color: var(--danger);
   white-space: nowrap;
 }
+
+/* ---------- scrollable modal with a wrapping <form> ----------
+   Bootstrap expects .modal-body to be a direct flex child of .modal-content.
+   Our form wraps the body + footer so submit works, and that block-level
+   element in between stopped the body from ever shrinking — so it grew past
+   the dialog and there was nothing left to scroll. Make the form the flex
+   column instead, and let the body shrink inside it. */
+.modal-content > form {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  max-height: 100%;
+  overflow: hidden;
+}
+
+.modal-content > form > .modal-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.modal-content > form > .modal-header,
+.modal-content > form > .modal-footer {
+  flex-shrink: 0;
+}
